@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import Logo from "../components/ui/Logo";
+
 const Signup = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -28,44 +32,73 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 to-violet-50">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow border border-indigo-100">
+        <div className="flex justify-center mb-5">
+          <Logo variant="brand" />
+        </div>
 
-      {error && <p className="error">{error}</p>}
+        <h2 className="text-xl font-semibold text-center text-indigo-800">
+          Create your account
+        </h2>
+        <p className="text-sm text-indigo-500 text-center mb-6">
+          One step closer to smarter expense tracking
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-4">
+            {error}
+          </p>
+        )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            type="text"
+            placeholder="Full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            intent="primary"
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            intent="primary"
+          />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating account..." : "Sign up"}
-        </button>
-      </form>
+          <Input
+            type="password"
+            placeholder="Create password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            intent="primary"
+          />
 
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
+          <div className="flex justify-center pt-3">
+            <Button
+              type="submit"
+              variant="solid"
+              color="indigo"
+              size="lg"
+              disabled={loading}
+            >
+              {loading ? "Creating account..." : "Create account"}
+            </Button>
+          </div>
+        </form>
+
+        <p className="text-sm text-center mt-6 text-indigo-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-medium hover:underline"
+          >
+            Login
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
