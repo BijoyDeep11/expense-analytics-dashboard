@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
-
+import CategoryChart from "../components/analytics/CategoryChart";
 import Layout from "../components/Layout";
 import Button from "../components/ui/Button";
 import ExpenseList from "../components/ExpenseList";
@@ -117,6 +117,7 @@ const Dashboard = () => {
         ))}
       </div>
 
+      <CategoryChart data={byCategory} />
 
       {/* Content */}
       {loading ? (
