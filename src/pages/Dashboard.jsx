@@ -9,6 +9,7 @@ import ExpenseList from "../components/ExpenseList";
 import ExpenseForm from "../components/ExpenseForm";
 import ExpenseFilters from "../components/ExpenseFilters";
 import { useExpenseAnalytics } from "../hooks/useExpenseAnalytics";
+import MonthlyTrendChart from "../components/analytics/MonthlyTrendChart";
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -70,8 +71,9 @@ const Dashboard = () => {
   }, [expenses, filters]);
 
   // Analytics (based on filtered data)
-  const { totalAmount, byCategory } =
-    useExpenseAnalytics(filteredExpenses);
+  const { totalAmount, byCategory, byMonth, insight, topCategoryInsight } =
+  useExpenseAnalytics(filteredExpenses);
+
 
   return (
     <Layout>
@@ -117,7 +119,27 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {insight && (
+      <div className="mb-6 rounded-lg border-l-4 border-indigo-500 bg-indigo-50 p-4 text-sm text-indigo-700">
+        💡 {insight}
+      </div>
+          )}
+
+          {insight && (
+        <div className="mb-4 rounded-lg border-l-4 border-indigo-500 bg-indigo-50 p-4 text-sm text-indigo-700">
+          💡 {insight}
+        </div>
+      )}
+  
+      {topCategoryInsight && (
+        <div className="mb-6 rounded-lg border-l-4 border-emerald-500 bg-emerald-50 p-4 text-sm text-emerald-700">
+          🏆 {topCategoryInsight}
+        </div>
+      )}
+
+
       <CategoryChart data={byCategory} />
+      <MonthlyTrendChart data={byMonth} />
 
       {/* Content */}
       {loading ? (
