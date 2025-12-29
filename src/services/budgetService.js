@@ -1,9 +1,13 @@
-import { databases, ID, Query } from "./appwrite";
-import { DATABASE_ID, BUDGETS_COLLECTION_ID } from "../config";
+import { databases } from "./appwrite";
+import { Query, ID } from "appwrite";
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const BUDGETS_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_BUDGET_COLLECTION_ID;
 
 export const budgetService = {
   // ----------------------------------------
-  // Fetch all budgets (global + monthly)
+  // Fetch ALL budgets for user
   // ----------------------------------------
   async getBudgets(userId) {
     const res = await databases.listDocuments(
@@ -16,52 +20,71 @@ export const budgetService = {
   },
 
   // ----------------------------------------
-  // Fetch budgets for a specific month
+  // Delete budget
+  // ----------------------------------------
+  async deleteBudget(budgetId) {
+    return databases.deleteDocument(
+      DATABASE_ID,
+      BUDGETS_COLLECTION_ID,
+      budgetId
+    );
+  },
+
+  // ----------------------------------------
+  // Fetch budgets for a month (monthly + global)
   // ----------------------------------------
   async getBudgetsForMonth(userId, month) {
+    const queries = [Query.equal("userId", userId)];
+
+    if (month) {
+      // Monthly budgets ONLY
+      queries.push(Query.equal("month", month));
+    } else {
+      // Global budgets ONLY
+      queries.push(Query.isNull("month"));
+    }
+
     const res = await databases.listDocuments(
       DATABASE_ID,
       BUDGETS_COLLECTION_ID,
-      [
-        Query.equal("userId", userId),
-        Query.or([
-          Query.equal("month", month),
-          Query.equal("month", null),
-        ]),
-      ]
+      queries
     );
 
     return res.documents;
   },
 
   // ----------------------------------------
-  // Create or update a budget
+  // Create or update budget (UPSERT)
   // ----------------------------------------
   async upsertBudget({ userId, category, limit, month }) {
-    // Check if budget already exists
+    const queries = [
+      Query.equal("userId", userId),
+      Query.equal("category", category),
+    ];
+
+    if (month) {
+      queries.push(Query.equal("month", month));
+    } else {
+      queries.push(Query.isNull("month"));
+    }
+
     const existing = await databases.listDocuments(
       DATABASE_ID,
       BUDGETS_COLLECTION_ID,
-      [
-        Query.equal("userId", userId),
-        Query.equal("category", category),
-        Query.equal("month", month ?? null),
-      ]
+      queries
     );
 
-    // Update existing budget
+    // Update existing
     if (existing.documents.length > 0) {
-      const doc = existing.documents[0];
-
       return databases.updateDocument(
         DATABASE_ID,
         BUDGETS_COLLECTION_ID,
-        doc.$id,
+        existing.documents[0].$id,
         { limit }
       );
     }
 
-    // Create new budget
+    // Create new
     return databases.createDocument(
       DATABASE_ID,
       BUDGETS_COLLECTION_ID,
