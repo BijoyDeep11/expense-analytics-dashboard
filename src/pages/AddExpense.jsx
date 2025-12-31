@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
@@ -13,7 +13,7 @@ const AddExpense = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { expenseId } = useParams();
-
+  const lastSavedBudgetRef = useRef({});
   const isEditMode = Boolean(expenseId);
   const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -182,23 +182,30 @@ const AddExpense = () => {
                       }))
                     }
                     onBlur={async () => {
-                      const limit = parseCurrency(budgetInputs[cat] ?? "");
-                      if (!limit) return;
+                    const limit = parseCurrency(budgetInputs[cat] ?? "");
+                    if (!limit) return;
 
-                      await budgetService.upsertBudget({
-                        userId: user.$id,
-                        category: cat,
-                        limit,
-                        month:
-                          budgetScope === "monthly"
-                            ? selectedMonth
-                            : null,
-                      });
+                    const key = `${cat}-${budgetScope}-${budgetScope === "monthly" ? selectedMonth : "global"}`;
 
-                      const updated =
-                        await budgetService.getBudgets(user.$id);
-                      setBudgets(updated);
-                    }}
+                    // 🛑 Prevent duplicate save
+                    if (lastSavedBudgetRef.current[key] === limit) return;
+
+                    lastSavedBudgetRef.current[key] = limit;
+
+                    await budgetService.upsertBudget({
+                      userId: user.$id,
+                      category: cat,
+                      limit,
+                      month:
+                        budgetScope === "monthly"
+                          ? selectedMonth
+                          : null,
+                    });
+
+                    const updated = await budgetService.getBudgets(user.$id);
+                    setBudgets(updated);
+                  }}
+
                   />
                 </div>
               );

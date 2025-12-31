@@ -111,148 +111,200 @@ const selectedMonth =
   categoryTrendInsight
 } = useExpenseAnalytics(filteredExpenses, budgets);
 
-  return (
-  <Layout>
-    {/* Header */}
-    <div className="mb-6">
-      <h1 className="text-2xl font-semibold text-slate-800">
-        Dashboard
-      </h1>
-      <p className="text-sm text-slate-500">
-        Track, filter, and analyze your expenses
-      </p>
-    </div>
-
-    {/* Filters */}
-    <div className="mb-8 p-4 bg-white rounded-lg border border-slate-100">
-      <ExpenseFilters
-        filters={filters}
-        onChange={setFilters}
-        categories={categories}
-      />
-    </div>
-
-    {/* Analytics Cards */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-      {/* Total */}
-      <div className="p-5 bg-slate-50 border border-slate-100 rounded-lg">
-        <p className="text-sm text-slate-500 mb-1">
-          Total Spent
-        </p>
-        <p className="text-3xl font-semibold text-slate-800">
-          {formatCurrency(totalAmount)}
+return (
+    <Layout>
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-slate-800">
+          Dashboard
+        </h1>
+        <p className="text-sm text-slate-500">
+          Track, filter, and analyze your expenses
         </p>
       </div>
 
-      {/* Category Cards + Budgets */}
-      {Object.entries(byCategory).map(([cat, amt]) => {
-        const budget = budgetByCategory?.[cat];
+      {/* Filters (no skeleton needed) */}
+      <div className="mb-8 p-4 bg-white rounded-lg border border-slate-100">
+        <ExpenseFilters
+          filters={filters}
+          onChange={setFilters}
+          categories={categories}
+        />
+      </div>
 
-        return (
-          <div
-            key={cat}
-            className="p-5 bg-white border border-slate-100 rounded-lg"
-          >
-            <p className="text-sm text-slate-500 mb-1">
-              {cat}
-            </p>
-
-            <p className="text-2xl font-medium text-slate-800">
-              {formatCurrency(amt)}
-            </p>
-
-            {/* Budget UI */}
-            {budget ? (
-              <div className="mt-3">
-                {/* Progress bar */}
-                <div className="h-2 w-full rounded bg-slate-200 overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      budget.overBudget
-                        ? "bg-red-500"
-                        : "bg-emerald-500"
-                    }`}
-                    style={{ width: `${budget.percentUsed}%` }}
-                  />
-                </div>
-
-                {/* Budget text */}
-                <p
-                  className={`mt-2 text-sm ${
-                    budget.overBudget
-                      ? "text-red-600"
-                      : "text-slate-600"
-                  }`}
-                >
-                  {budget.overBudget
-                    ? `Over budget by ${formatCurrency(
-                        Math.abs(budget.remaining)
-                      )}`
-                    : `${formatCurrency(
-                        budget.remaining
-                      )} left of ${formatCurrency(
-                        budget.limit
-                      )}`}
-                </p>
-              </div>
-            ) : (
-              <p className="mt-2 text-sm text-slate-400">
-                No budget set
-              </p>
-            )}
+      {/* Analytics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {/* Total */}
+        {loading ? (
+          <div className="p-5 bg-slate-50 border border-slate-100 rounded-lg">
+            <div className="h-4 w-24 bg-slate-200 rounded animate-pulse mb-2" />
+            <div className="h-8 w-32 bg-slate-200 rounded animate-pulse" />
           </div>
-        );
-      })}
-    </div>
+        ) : (
+          <div className="p-5 bg-slate-50 border border-slate-100 rounded-lg">
+            <p className="text-sm text-slate-500 mb-1">
+              Total Spent
+            </p>
+            <p className="text-3xl font-semibold text-slate-800">
+              {formatCurrency(totalAmount)}
+            </p>
+          </div>
+        )}
 
-    {/* Insights */}
-    {insight && (
-      <div className="mb-4 rounded-lg border-l-4 border-indigo-500 bg-indigo-50 p-4 text-sm text-indigo-700">
-        💡 {insight}
+        {/* Category Cards + Budgets */}
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="p-5 bg-white border border-slate-100 rounded-lg"
+            >
+              <div className="h-4 w-20 bg-slate-200 rounded animate-pulse mb-2" />
+              <div className="h-6 w-28 bg-slate-200 rounded animate-pulse mb-3" />
+              <div className="h-2 w-full bg-slate-200 rounded animate-pulse" />
+            </div>
+          ))
+        ) : (
+          Object.entries(byCategory).map(([cat, amt]) => {
+            const budget = budgetByCategory?.[cat];
+
+            return (
+              <div
+                key={cat}
+                className="p-5 bg-white border border-slate-100 rounded-lg"
+              >
+                <p className="text-sm text-slate-500 mb-1">
+                  {cat}
+                </p>
+
+                <p className="text-2xl font-medium text-slate-800">
+                  {formatCurrency(amt)}
+                </p>
+
+                {budget ? (
+                  <div className="mt-3">
+                    <div className="h-2 w-full rounded bg-slate-200 overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          budget.overBudget
+                            ? "bg-red-500"
+                            : "bg-emerald-500"
+                        }`}
+                        style={{
+                          width: `${Math.min(
+                            budget.percentUsed,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+
+                    <p
+                      className={`mt-2 text-sm ${
+                        budget.overBudget
+                          ? "text-red-600"
+                          : "text-slate-600"
+                      }`}
+                    >
+                      {budget.overBudget
+                        ? `Over budget by ${formatCurrency(
+                            Math.abs(budget.remaining)
+                          )}`
+                        : `${formatCurrency(
+                            budget.remaining
+                          )} left of ${formatCurrency(
+                            budget.limit
+                          )}`}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-sm text-slate-400">
+                    No budget set
+                  </p>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
-    )}
 
-    {topCategoryInsight && (
-      <div className="mb-6 rounded-lg border-l-4 border-emerald-500 bg-emerald-50 p-4 text-sm text-emerald-700">
-        🏆 {topCategoryInsight}
-      </div>
-    )}
+      {/* Insights */}
+      {loading ? (
+        <div className="space-y-3 mb-6">
+          <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse" />
+          <div className="h-4 w-2/3 bg-slate-200 rounded animate-pulse" />
+        </div>
+      ) : (
+        <>
+          {insight && (
+            <div className="mb-4 rounded-lg border-l-4 border-indigo-500 bg-indigo-50 p-4 text-sm text-indigo-700">
+              💡 {insight}
+            </div>
+          )}
 
-    {budgetSummaryInsight && (
-      <div className="mb-6 rounded-lg border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-700">
-        ⚠️ {budgetSummaryInsight}
-      </div>
-    )}
+          {topCategoryInsight && (
+            <div className="mb-4 rounded-lg border-l-4 border-emerald-500 bg-emerald-50 p-4 text-sm text-emerald-700">
+              🏆 {topCategoryInsight}
+            </div>
+          )}
 
-    {categoryTrendInsight && (
-      <div className="mb-6 rounded-lg border-l-4 border-slate-500 bg-slate-50 p-4 text-sm text-slate-700">
-        📈 {categoryTrendInsight}
-      </div>
-    )}
+          {budgetSummaryInsight && (
+            <div className="mb-4 rounded-lg border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-700">
+              ⚠️ {budgetSummaryInsight}
+            </div>
+          )}
 
-    {/* Charts */}
-    <CategoryChart data={byCategory} />
-    <MonthlyTrendChart data={byMonth} />
+          {categoryTrendInsight && (
+            <div className="mb-6 rounded-lg border-l-4 border-slate-500 bg-slate-50 p-4 text-sm text-slate-700">
+              📈 {categoryTrendInsight}
+            </div>
+          )}
+        </>
+      )}
 
-    {/* Expenses */}
-    {loading ? (
-      <p>Loading expenses...</p>
-    ) : (
-      <>
-        <h2 className="text-lg font-semibold text-slate-800 mb-3">
-          Expenses
-        </h2>
+      {/* Charts */}
+      {loading ? (
+        <>
+          <div className="h-64 mb-6 rounded-lg border bg-white p-4">
+            <div className="h-full w-full bg-slate-200 rounded animate-pulse" />
+          </div>
+          <div className="h-64 rounded-lg border bg-white p-4">
+            <div className="h-full w-full bg-slate-200 rounded animate-pulse" />
+          </div>
+        </>
+      ) : (
+        <>
+          <CategoryChart data={byCategory} />
+          <MonthlyTrendChart data={byMonth} />
+        </>
+      )}
 
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+      {/* Expenses */}
+      <h2 className="text-lg font-semibold text-slate-800 mb-3">
+        Expenses
+      </h2>
+
+      <div className="bg-white rounded-lg border border-slate-100 p-4">
+        {loading ? (
+          <ul className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <li
+                key={i}
+                className="rounded-lg border bg-white p-4"
+              >
+                <div className="h-4 w-40 bg-slate-200 rounded animate-pulse mb-2" />
+                <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
+              </li>
+            ))}
+          </ul>
+        ) : (
           <ExpenseList
             expenses={filteredExpenses}
             onDelete={handleDelete}
           />
-        </div>
-      </>
-    )}
-  </Layout>
-);
+        )}
+      </div>
+    </Layout>
+  );
 }
 
 export default Dashboard
