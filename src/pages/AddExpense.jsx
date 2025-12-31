@@ -46,10 +46,36 @@ const AddExpense = () => {
 
 
   useEffect(() => {
-  if (isEditMode && initialData) {
-    setIsDirty(true);
+  setIsDirty(false);
+}, [expenseId]);
+
+
+const handleDeleteExpense = async () => {
+  if (!expenseId) return;
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this expense?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await expenseService.deleteExpense(expenseId);
+
+    setExpenses((prev) =>
+      prev.filter((e) => e.$id !== expenseId)
+    );
+
+    // ✅ reset edit state
+    setInitialData(null);
+    setIsDirty(false);
+
+    navigate("/add");
+  } catch (err) {
+    console.error("Failed to delete expense", err);
   }
-}, [initialData, isEditMode]);
+};
+
 
 
   // -----------------------------
@@ -76,7 +102,14 @@ const AddExpense = () => {
   }, [user.$id]);
 
   const getBudgetForCategory = (category) =>
-    budgets.find((b) => b.category === category && b.month === null);
+  budgets.find(
+    (b) =>
+      b.category === category &&
+      (budgetScope === "monthly"
+        ? b.month === selectedMonth
+        : b.month === null)
+  );
+
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("en-IN", {
@@ -107,6 +140,7 @@ const AddExpense = () => {
           <ExpenseForm
             loading={loading}
             initialData={initialData}
+              onChange={() => setIsDirty(true)}
             onSubmit={async (data) => {
               setLoading(true);
               try {
@@ -129,6 +163,16 @@ const AddExpense = () => {
             }}
           />
 
+          {isEditMode && (
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleDeleteExpense}
+              className="mt-4 w-full rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
+            >
+              Delete Expense
+            </button>
+          )}
 
           {/* ---------- Budget UI (UNCHANGED) ---------- */}
           <div className="mt-10 max-w-md">

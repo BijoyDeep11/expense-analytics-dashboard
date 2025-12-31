@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
 import CategoryChart from "../components/analytics/CategoryChart";
@@ -32,16 +31,16 @@ const Dashboard = () => {
   });
 
   const now = new Date();
-const selectedMonth =
-  filters.month === "all"
-    ? null
-    : new Date(
-        now.getFullYear(),
-        Number(filters.month)
-      ).toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      });
+  const selectedMonth =
+    filters.month === "all"
+      ? null
+      : new Date(
+          now.getFullYear(),
+          Number(filters.month)
+        ).toLocaleString("default", {
+          month: "short",
+          year: "numeric",
+        });
 
 
   useEffect(() => {
@@ -69,16 +68,16 @@ const selectedMonth =
   }, [user.$id]);
 
   // Delete expense
-  const handleDelete = async (expenseId) => {
-    try {
-      await expenseService.deleteExpense(expenseId);
-      setExpenses((prev) =>
-        prev.filter((expense) => expense.$id !== expenseId)
-      );
-    } catch (err) {
-      console.error("Failed to delete expense", err);
-    }
-  };
+  const handleDelete = useCallback(async (expenseId) => {
+  try {
+    await expenseService.deleteExpense(expenseId);
+    setExpenses((prev) =>
+      prev.filter((expense) => expense.$id !== expenseId)
+    );
+  } catch (err) {
+    console.error("Failed to delete expense", err);
+  }
+}, []);
 
   // Derived categories
   const categories = useMemo(() => {
@@ -87,29 +86,38 @@ const selectedMonth =
 
   // Filtered expenses
   const filteredExpenses = useMemo(() => {
-    return expenses.filter((exp) => {
-      const categoryMatch =
-        filters.category === "all" || exp.category === filters.category;
+    return expenses.filter((expense) => {
+      if (filters.category !== "all" &&
+          expense.category !== filters.category) {
+        return false;
+      }
 
-      const monthMatch =
-        filters.month === "all" ||
-        new Date(exp.date).getMonth() === Number(filters.month);
+      if (filters.month !== "all") {
+        const d = new Date(expense.date);
+        if (d.getMonth().toString() !== filters.month) {
+          return false;
+        }
+      }
 
-      return categoryMatch && monthMatch;
+      return true;
     });
   }, [expenses, filters]);
 
   // Analytics (based on filtered data)
+  const analytics = useMemo(() => {
+    return useExpenseAnalytics(filteredExpenses, budgets);
+  }, [filteredExpenses, budgets]);
+
   const {
-  totalAmount,
-  byCategory,
-  byMonth,
-  budgetByCategory,
-  insight,
-  topCategoryInsight,
-  budgetSummaryInsight,
-  categoryTrendInsight
-} = useExpenseAnalytics(filteredExpenses, budgets);
+    totalAmount,
+    byCategory,
+    byMonth,
+    budgetByCategory,
+    insight,
+    topCategoryInsight,
+    budgetSummaryInsight,
+    categoryTrendInsight
+  } = analytics;
 
 return (
     <Layout>

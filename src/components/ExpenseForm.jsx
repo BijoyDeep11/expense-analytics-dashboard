@@ -31,6 +31,7 @@ const ExpenseForm = ({ initialData = null, onSubmit, loading }) => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+      onChange?.();
   };
 
   const handleSubmit = (e) => {
