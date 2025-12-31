@@ -15,7 +15,7 @@ const AddExpense = () => {
   const { expenseId } = useParams();
 
   const isEditMode = Boolean(expenseId);
-
+  const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState(null);
   const [expenses, setExpenses] = useState([]);
@@ -44,12 +44,21 @@ const AddExpense = () => {
     if (expense) setInitialData(expense);
   }, [expenseId, expenses]);
 
+
+  useEffect(() => {
+  if (isEditMode && initialData) {
+    setIsDirty(true);
+  }
+}, [initialData, isEditMode]);
+
+
   // -----------------------------
   // Budget state (UNCHANGED)
   // -----------------------------
   const [budgets, setBudgets] = useState([]);
   const [budgetInputs, setBudgetInputs] = useState({});
   const [budgetScope, setBudgetScope] = useState("global");
+
 
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
@@ -79,6 +88,7 @@ const AddExpense = () => {
   const parseCurrency = (value) =>
     Number(value.replace(/[₹,]/g, "")) || 0;
 
+
   return (
     <Layout>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -87,6 +97,12 @@ const AddExpense = () => {
           <h2 className="text-xl font-semibold mb-6">
             {isEditMode ? "Edit Expense" : "Add Expense"}
           </h2>
+
+          {isEditMode && initialData && (
+            <p className="text-sm text-slate-500 mb-4">
+              Editing: <span className="font-medium">{initialData.title}</span>
+            </p>
+          )}
 
           <ExpenseForm
             loading={loading}
@@ -102,6 +118,8 @@ const AddExpense = () => {
                     userId: user.$id,
                   });
                 }
+                setIsDirty(false);
+                setInitialData(null);
                 navigate("/add");
               } catch (err) {
                 console.error("Failed to save expense", err);
@@ -110,6 +128,7 @@ const AddExpense = () => {
               }
             }}
           />
+
 
           {/* ---------- Budget UI (UNCHANGED) ---------- */}
           <div className="mt-10 max-w-md">
@@ -193,24 +212,39 @@ const AddExpense = () => {
             Edit Existing Expense
           </h2>
 
-          <ul className="space-y-3">
-            {expenses.map((expense) => (
-              <li
-                key={expense.$id}
-                onClick={() => navigate(`/add/${expense.$id}`)}
-                className={`cursor-pointer rounded-lg border p-4 bg-white hover:bg-slate-50 ${
-                  expenseId === expense.$id
-                    ? "border-indigo-500"
-                    : "border-slate-200"
-                }`}
-              >
-                <p className="font-medium">{expense.title}</p>
-                <p className="text-sm text-slate-500">
-                  ₹{expense.amount} • {expense.category}
-                </p>
-              </li>
-            ))}
-          </ul>
+          {expenses.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              No expenses yet.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {expenses.map((expense) => (
+                <li
+                  key={expense.$id}
+                  onClick={() => {
+                    if (isDirty) {
+                      const confirmLeave = window.confirm(
+                        "You have unsaved changes. Discard them and continue?"
+                      );
+                      if (!confirmLeave) return;
+                    }
+
+                    navigate(`/add/${expense.$id}`);
+                  }}
+                  className={`cursor-pointer rounded-lg border p-4 bg-white hover:bg-slate-50 ${
+                    expenseId === expense.$id
+                      ? "border-indigo-500"
+                      : "border-slate-200"
+                  }`}
+                >
+                  <p className="font-medium">{expense.title}</p>
+                  <p className="text-sm text-slate-500">
+                    ₹{expense.amount} • {expense.category}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </Layout>

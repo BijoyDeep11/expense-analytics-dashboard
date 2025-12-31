@@ -106,7 +106,9 @@ const selectedMonth =
   byMonth,
   budgetByCategory,
   insight,
-  topCategoryInsight
+  topCategoryInsight,
+  budgetSummaryInsight,
+  categoryTrendInsight
 } = useExpenseAnalytics(filteredExpenses, budgets);
 
   return (
@@ -213,6 +215,18 @@ const selectedMonth =
     {topCategoryInsight && (
       <div className="mb-6 rounded-lg border-l-4 border-emerald-500 bg-emerald-50 p-4 text-sm text-emerald-700">
         🏆 {topCategoryInsight}
+      </div>
+    )}
+
+    {budgetSummaryInsight && (
+      <div className="mb-6 rounded-lg border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-700">
+        ⚠️ {budgetSummaryInsight}
+      </div>
+    )}
+
+    {categoryTrendInsight && (
+      <div className="mb-6 rounded-lg border-l-4 border-slate-500 bg-slate-50 p-4 text-sm text-slate-700">
+        📈 {categoryTrendInsight}
       </div>
     )}
 
