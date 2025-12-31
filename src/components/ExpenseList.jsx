@@ -1,8 +1,12 @@
 import ExpenseItem from "./ExpenseItem";
 
-const ExpenseList = ({ expenses, onEdit, onDelete }) => {
-  if (expenses.length === 0) {
-    return <p>No expenses yet</p>;
+const ExpenseList = ({ expenses }) => {
+  if (!expenses || expenses.length === 0) {
+    return (
+      <p className="text-sm text-slate-400">
+        No expenses yet
+      </p>
+    );
   }
 
   return (
@@ -11,8 +15,7 @@ const ExpenseList = ({ expenses, onEdit, onDelete }) => {
         <ExpenseItem
           key={expense.$id}
           expense={expense}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          /* 🔒 NO onEdit, NO onDelete passed */
         />
       ))}
     </ul>

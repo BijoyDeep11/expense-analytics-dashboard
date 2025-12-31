@@ -1,6 +1,4 @@
-import Button from "./ui/Button";
-
-const ExpenseItem = ({ expense, onEdit, onDelete }) => {
+const ExpenseItem = ({ expense }) => {
   return (
     <li className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
       <div>
@@ -10,22 +8,7 @@ const ExpenseItem = ({ expense, onEdit, onDelete }) => {
         </p>
       </div>
 
-      <div className="flex gap-2">
-        <Button
-          className="px-4 py-2"
-          onClick={() => onEdit(expense)}
-        >
-          Edit
-        </Button>
-
-        <Button
-          bgColor="bg-red-500"
-          className="px-4 py-2"
-          onClick={() => onDelete(expense.$id)}
-        >
-          Delete
-        </Button>
-      </div>
+      {/* 🔒 Read-only: no Edit / Delete buttons */}
     </li>
   );
 };

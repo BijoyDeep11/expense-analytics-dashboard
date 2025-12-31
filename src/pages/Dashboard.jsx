@@ -4,9 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
 import CategoryChart from "../components/analytics/CategoryChart";
 import Layout from "../components/Layout";
-import Button from "../components/ui/Button";
 import ExpenseList from "../components/ExpenseList";
-import ExpenseForm from "../components/ExpenseForm";
 import ExpenseFilters from "../components/ExpenseFilters";
 import { useExpenseAnalytics } from "../hooks/useExpenseAnalytics";
 import MonthlyTrendChart from "../components/analytics/MonthlyTrendChart";
@@ -16,10 +14,9 @@ import { budgetService } from "../services/budgetService";
 const Dashboard = () => {
   const { user, logout } = useAuth();
 
-  const [expenses, setExpenses] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingExpense, setEditingExpense] = useState(null);
 
   const formatCurrency = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -34,10 +31,14 @@ const Dashboard = () => {
     month: "all",
   });
 
-  const selectedMonth =
+  const now = new Date();
+const selectedMonth =
   filters.month === "all"
     ? null
-    : new Date(2025, Number(filters.month)).toLocaleString("default", {
+    : new Date(
+        now.getFullYear(),
+        Number(filters.month)
+      ).toLocaleString("default", {
         month: "short",
         year: "numeric",
       });
@@ -231,54 +232,9 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg border border-slate-100 p-4">
           <ExpenseList
             expenses={filteredExpenses}
-            onEdit={setEditingExpense}
             onDelete={handleDelete}
           />
         </div>
-
-        {/* Edit Expense */}
-        {editingExpense && (
-          <div className="mt-10 bg-slate-50 p-6 rounded-lg border border-slate-200 max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              Edit Expense
-            </h3>
-
-            <ExpenseForm
-              initialData={editingExpense}
-              loading={false}
-              onSubmit={async (data) => {
-                try {
-                  await expenseService.updateExpense(
-                    editingExpense.$id,
-                    data
-                  );
-
-                  setExpenses((prev) =>
-                    prev.map((expense) =>
-                      expense.$id === editingExpense.$id
-                        ? { ...expense, ...data }
-                        : expense
-                    )
-                  );
-
-                  setEditingExpense(null);
-                } catch (err) {
-                  console.error("Failed to update expense", err);
-                }
-              }}
-            />
-
-            <div className="mt-3">
-              <Button
-                bgColor="bg-gray-300"
-                textColor="text-black"
-                onClick={() => setEditingExpense(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
       </>
     )}
   </Layout>

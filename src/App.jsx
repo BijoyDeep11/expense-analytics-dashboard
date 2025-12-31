@@ -20,8 +20,19 @@ function App() {
         }
       />
 
+      {/* Add Expense */}
       <Route
         path="/add"
+        element={
+          <ProtectedRoute>
+            <AddExpense />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Edit Expense (SAME PAGE, URL-BASED) */}
+      <Route
+        path="/add/:expenseId"
         element={
           <ProtectedRoute>
             <AddExpense />
