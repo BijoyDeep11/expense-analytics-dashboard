@@ -10,6 +10,7 @@ const ExpenseList = ({ expenses }) => {
           bg-slate-50 dark:bg-slate-900
           p-6
           text-center
+          animate-[fadeIn_0.2s_ease-out]
         "
       >
         <p className="text-sm text-slate-500 dark:text-slate-400">

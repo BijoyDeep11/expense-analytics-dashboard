@@ -81,7 +81,7 @@ const Login = () => {
         >
           {/* Logo */}
           <div className="flex justify-center">
-            <Logo variant="minimal" />
+            <Logo variant="brand" />
           </div>
 
           {/* Header */}

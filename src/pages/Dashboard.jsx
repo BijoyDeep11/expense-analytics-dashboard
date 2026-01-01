@@ -153,7 +153,7 @@ const monthOptions = useMemo(() => {
 return (
   <Layout>
     {/* ================= Header ================= */}
-    <div className="mb-6">
+    <div className="mb-6 animate-[fadeInUp_0.25s_ease-out]">
       <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
         Dashboard
       </h1>
@@ -175,12 +175,40 @@ return (
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
   {/* Total Spent */}
   {loading ? (
-    <div className="p-5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg">
+<div
+  className="
+    p-5
+    bg-slate-50 dark:bg-slate-900
+    border border-slate-100 dark:border-slate-800
+    rounded-lg
+
+    transition
+    hover:-translate-y-0.5
+    hover:shadow-md
+    dark:hover:shadow-black/40
+
+    animate-[popIn_0.2s_ease-out]
+  "
+>
       <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-2" />
       <div className="h-8 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
     </div>
   ) : (
-    <div className="p-5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg">
+<div
+  className="
+    p-5
+    bg-slate-50 dark:bg-slate-900
+    border border-slate-100 dark:border-slate-800
+    rounded-lg
+
+    transition
+    hover:-translate-y-0.5
+    hover:shadow-md
+    dark:hover:shadow-black/40
+
+    animate-[popIn_0.2s_ease-out]
+  "
+>
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
         Total Spent
       </p>
@@ -209,8 +237,21 @@ return (
       return (
         <div
           key={cat}
-          className="p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg"
+          className="
+            p-5
+            bg-white dark:bg-slate-900
+            border border-slate-100 dark:border-slate-800
+            rounded-lg
+
+            transition
+            hover:-translate-y-0.5
+            hover:shadow-md
+            dark:hover:shadow-black/40
+
+            animate-[popIn_0.2s_ease-out]
+          "
         >
+
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
             {cat}
           </p>

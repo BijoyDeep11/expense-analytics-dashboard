@@ -4,7 +4,6 @@ const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Init theme
   useEffect(() => {
     const stored = localStorage.getItem("theme");
 
@@ -53,22 +52,22 @@ const ThemeToggle = () => {
           bg-white dark:bg-slate-800
           text-slate-700 dark:text-slate-200
           hover:bg-slate-50 dark:hover:bg-slate-700
-          transition
+          transition-colors duration-200
           focus:outline-none
           focus:ring-2 focus:ring-indigo-500
           focus:ring-offset-2 dark:focus:ring-offset-slate-900
         "
       >
-        {/* Animated Icon */}
+        {/* Subtle animated icon */}
         <span
           className={`
             inline-flex
-            transition-transform duration-300 ease-out
-            ${isDark ? "rotate-180 scale-110" : "rotate-0 scale-100"}
+            transition-all duration-300 ease-out
+            ${isDark ? "rotate-90 opacity-90" : "rotate-0 opacity-90"}
           `}
         >
           {isDark ? (
-            /* 🌞 Sun (go light) */
+            /* 🌞 Sun */
             <svg
               className="h-4 w-4"
               viewBox="0 0 24 24"
@@ -77,7 +76,7 @@ const ThemeToggle = () => {
               <path d="M12 18a6 6 0 100-12 6 6 0 000 12zm0-16a1 1 0 011-1h0a1 1 0 01-1 1zm0 20a1 1 0 011-1h0a1 1 0 01-1 1zm10-10a1 1 0 01-1 1h0a1 1 0 011-1zM4 12a1 1 0 01-1 1h0a1 1 0 011-1zm13.66 6.34a1 1 0 01-1.41 0h0a1 1 0 011.41 0zM6.34 6.34a1 1 0 01-1.41 0h0a1 1 0 011.41 0zm11.32-1.41a1 1 0 010 1.41h0a1 1 0 010-1.41zM6.34 17.66a1 1 0 010 1.41h0a1 1 0 010-1.41z" />
             </svg>
           ) : (
-            /* 🌙 Moon (go dark) */
+            /* 🌙 Moon */
             <svg
               className="h-4 w-4"
               viewBox="0 0 24 24"
@@ -98,8 +97,7 @@ const ThemeToggle = () => {
           bg-slate-900 dark:bg-slate-700
           px-2.5 py-1.5
           text-xs text-white
-          opacity-0
-          scale-95
+          opacity-0 scale-95
           transition-all duration-200
           group-hover:opacity-100
           group-hover:scale-100

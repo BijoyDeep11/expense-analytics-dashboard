@@ -140,7 +140,7 @@ return (
       </p>
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-[fadeInUp_0.25s_ease-out]">
       {/* ================= LEFT: PRIMARY WORKBENCH ================= */}
       <div className="lg:col-span-2 space-y-10">
         {/* ---------- Expense Form Card ---------- */}

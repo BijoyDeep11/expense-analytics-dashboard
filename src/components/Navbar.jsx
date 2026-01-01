@@ -31,7 +31,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <Logo variant="minimal" />
           <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            ExpenseDash
+            HisaabSe
           </span>
         </div>
 
@@ -48,7 +48,7 @@ const Navbar = () => {
             to="/add"
             className={`${isActive("/add")} transition-colors`}
           >
-            Add Expense
+            Manage Expense
           </Link>
         </div>
 
