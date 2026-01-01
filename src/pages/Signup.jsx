@@ -32,9 +32,39 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
+    <div
+      className="
+        min-h-screen
+        flex items-center justify-center px-4
+        relative overflow-hidden
+        bg-slate-50
+      "
+    >
+      {/* Subtle radial focus */}
+      <div
+        className="
+          pointer-events-none absolute inset-0
+          bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))]
+          from-indigo-100/40
+          via-transparent
+          to-transparent
+        "
+      />
+
+      {/* Soft vertical depth */}
+      <div
+        className="
+          pointer-events-none absolute inset-0
+          bg-linear-to-b
+          from-white
+          via-slate-50
+          to-slate-100
+        "
+      />
+
+      {/* Content */}
+      <div className="relative w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-8 space-y-6">
 
           {/* Logo */}
           <div className="flex justify-center">

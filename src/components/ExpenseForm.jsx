@@ -85,21 +85,25 @@ const ExpenseForm = ({
         required
       />
 
-      <div className="mt-4 flex gap-3">
-        <Button
-          type="submit"
-          loading={loading}
-          className="flex-1"
-        >
-          Save Expense
-        </Button>
+      {/* ===== Actions ===== */}
+    <div className="mt-6 flex items-center gap-3">
+      {/* Primary action */}
+      <Button
+        type="submit"
+        loading={loading}
+        className="px-8"
+      >
+        Save Expense
+      </Button>
 
-        {extraAction && (
-          <div className="flex-1">
-            {extraAction}
-          </div>
-        )}
-      </div>
+      {/* Destructive action – close but secondary */}
+      {extraAction && (
+        <div className="opacity-90">
+          {extraAction}
+        </div>
+      )}
+    </div>
+
     </form>
   );
 };
