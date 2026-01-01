@@ -25,11 +25,19 @@ const CategoryChart = ({ data }) => {
 
   if (chartData.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-        <p className="text-sm text-slate-500">
+      <div
+        className="
+          rounded-xl
+          border border-dashed border-slate-200 dark:border-slate-800
+          bg-slate-50 dark:bg-slate-900
+          p-6
+          text-center
+        "
+      >
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           No data available
         </p>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           Try adjusting filters to see category breakdown
         </p>
       </div>
@@ -37,13 +45,20 @@ const CategoryChart = ({ data }) => {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div
+      className="
+        rounded-xl
+        border border-slate-200 dark:border-slate-800
+        bg-white dark:bg-slate-900
+        p-6
+      "
+    >
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-sm font-medium text-slate-700">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Spending by Category
         </h3>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           Distribution of expenses across categories
         </p>
       </div>
@@ -72,10 +87,14 @@ const CategoryChart = ({ data }) => {
 
             <Tooltip
               contentStyle={{
-                backgroundColor: "white",
+                backgroundColor: "#020617", // slate-950
                 borderRadius: "8px",
-                border: "1px solid #e5e7eb",
+                border: "1px solid #334155", // slate-700
                 fontSize: "12px",
+                color: "#e5e7eb",
+              }}
+              labelStyle={{
+                color: "#e5e7eb",
               }}
               formatter={(value) => [`₹${value}`, "Amount"]}
             />

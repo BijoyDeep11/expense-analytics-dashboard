@@ -3,7 +3,7 @@ import React from "react";
 export default function Button({
   children,
   type = "button",
-  bgColor = "bg-indigo-600",
+  bgColor = "bg-indigo-600 dark:bg-indigo-500",
   textColor = "text-white",
   className = "",
   loading = false,
@@ -30,21 +30,22 @@ export default function Button({
         ${bgColor}
         ${textColor}
 
-        shadow-sm
+        shadow-sm dark:shadow-none
         transition-all
         duration-200
         ease-out
 
-        hover:shadow-md
-        hover:-translate-y-px
+        hover:shadow-md dark:hover:shadow-none
+        hover:-translate-y-px dark:hover:translate-y-0
 
         active:translate-y-0
-        active:shadow-sm
+        active:shadow-sm dark:active:shadow-none
 
         focus:outline-none
         focus:ring-2
-        focus:ring-indigo-500
+        focus:ring-indigo-500 dark:focus:ring-indigo-400
         focus:ring-offset-2
+        focus:ring-offset-white dark:focus:ring-offset-slate-900
 
         disabled:opacity-50
         disabled:cursor-not-allowed

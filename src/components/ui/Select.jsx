@@ -19,7 +19,7 @@ const Select = React.forwardRef(function Select(
       {label && (
         <label
           htmlFor={id}
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
           {label}
         </label>
@@ -36,8 +36,8 @@ const Select = React.forwardRef(function Select(
             pr-10
             rounded-lg
 
-            bg-white
-            text-slate-900
+            bg-white dark:bg-slate-900
+            text-slate-900 dark:text-slate-100
             border
             appearance-none
             cursor-pointer
@@ -54,17 +54,17 @@ const Select = React.forwardRef(function Select(
                   focus:border-red-500
                 `
                 : `
-                  border-slate-200
-                  hover:border-slate-300
-                  focus:border-indigo-600
+                  border-slate-200 dark:border-slate-700
+                  hover:border-slate-300 dark:hover:border-slate-600
+                  focus:border-indigo-600 dark:focus:border-indigo-400
                   focus:ring-2
-                  focus:ring-indigo-500
+                  focus:ring-indigo-500 dark:focus:ring-indigo-400
                 `
             }
 
             focus:outline-none
 
-            disabled:bg-slate-100
+            disabled:bg-slate-100 dark:disabled:bg-slate-800
             disabled:cursor-not-allowed
             disabled:opacity-60
 
@@ -90,7 +90,7 @@ const Select = React.forwardRef(function Select(
         </select>
 
         {/* Chevron */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 dark:text-slate-500">
           <svg
             className="h-4 w-4"
             viewBox="0 0 20 20"
@@ -106,7 +106,7 @@ const Select = React.forwardRef(function Select(
       </div>
 
       {error && (
-        <p className="text-xs text-red-600">
+        <p className="text-xs text-red-600 dark:text-red-400">
           {error}
         </p>
       )}

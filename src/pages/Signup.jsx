@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
+import ThemeToggle from "../components/ui/ThemeToggle";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import Logo from "../components/ui/Logo";
@@ -37,15 +37,19 @@ const Signup = () => {
         min-h-screen
         flex items-center justify-center px-4
         relative overflow-hidden
-        bg-slate-50
+        bg-slate-50 dark:bg-slate-950
       "
     >
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       {/* Subtle radial focus */}
       <div
         className="
           pointer-events-none absolute inset-0
           bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))]
-          from-indigo-100/40
+          from-indigo-100/40 dark:from-indigo-900/30
           via-transparent
           to-transparent
         "
@@ -56,16 +60,24 @@ const Signup = () => {
         className="
           pointer-events-none absolute inset-0
           bg-linear-to-b
-          from-white
-          via-slate-50
-          to-slate-100
+          from-white dark:from-slate-950
+          via-slate-50 dark:via-slate-900
+          to-slate-100 dark:to-slate-900
         "
       />
 
       {/* Content */}
       <div className="relative w-full max-w-md">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-8 space-y-6">
-
+        <div
+          className="
+            bg-white dark:bg-slate-900
+            rounded-2xl
+            border border-slate-200 dark:border-slate-800
+            shadow-md dark:shadow-none
+            p-8
+            space-y-6
+          "
+        >
           {/* Logo */}
           <div className="flex justify-center">
             <Logo variant="brand" />
@@ -73,17 +85,27 @@ const Signup = () => {
 
           {/* Header */}
           <div className="space-y-1 text-center">
-            <h2 className="text-2xl font-semibold text-slate-900">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
               Create your account
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Start tracking your expenses smarter
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 text-center">
+            <div
+              className="
+                rounded-lg
+                bg-red-50 dark:bg-red-950
+                border border-red-200 dark:border-red-800
+                px-4 py-3
+                text-sm
+                text-red-600 dark:text-red-400
+                text-center
+              "
+            >
               {error}
             </div>
           )}
@@ -121,11 +143,11 @@ const Signup = () => {
           </form>
 
           {/* Footer */}
-          <p className="text-sm text-center text-slate-600">
+          <p className="text-sm text-center text-slate-600 dark:text-slate-400">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-indigo-600 font-medium hover:underline"
+              className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
             >
               Login
             </Link>

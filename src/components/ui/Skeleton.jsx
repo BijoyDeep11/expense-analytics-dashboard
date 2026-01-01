@@ -1,7 +1,12 @@
 const Skeleton = ({ className = "" }) => {
   return (
     <div
-      className={`animate-pulse rounded bg-slate-200 ${className}`}
+      className={`
+        animate-pulse
+        rounded
+        bg-slate-200 dark:bg-slate-700
+        ${className}
+      `}
     />
   );
 };

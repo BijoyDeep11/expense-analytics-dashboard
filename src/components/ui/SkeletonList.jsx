@@ -6,7 +6,12 @@ const SkeletonList = ({ rows = 4 }) => {
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}
-          className="rounded-lg border bg-white p-4"
+          className="
+            rounded-lg
+            border border-slate-200 dark:border-slate-800
+            bg-white dark:bg-slate-900
+            p-4
+          "
         >
           <Skeleton className="h-4 w-40 mb-2" />
           <Skeleton className="h-3 w-24" />

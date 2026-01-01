@@ -126,14 +126,14 @@ const confirmDeleteExpense = async () => {
     Number(value.replace(/[₹,]/g, "")) || 0;
 
 
-  return (
+return (
   <Layout>
     {/* ================= PAGE HEADER ================= */}
     <div className="mb-8">
-      <h1 className="text-2xl font-semibold text-slate-900">
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
         {isEditMode ? "Edit Expense" : "Add Expense"}
       </h1>
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
         {isEditMode
           ? "Update details or delete this expense"
           : "Log a new expense and manage budgets"}
@@ -144,11 +144,11 @@ const confirmDeleteExpense = async () => {
       {/* ================= LEFT: PRIMARY WORKBENCH ================= */}
       <div className="lg:col-span-2 space-y-10">
         {/* ---------- Expense Form Card ---------- */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
           {isEditMode && initialData && (
-            <div className="mb-4 text-sm text-slate-500">
+            <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
               Editing:{" "}
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-slate-800 dark:text-slate-100">
                 {initialData.title}
               </span>
             </div>
@@ -182,10 +182,9 @@ const confirmDeleteExpense = async () => {
               isEditMode && (
                 <Button
                   type="button"
-                  bgColor="bg-red-500"
+                  bgColor="bg-red-500 dark:bg-red-600"
                   loading={loading}
                   onClick={handleDeleteExpense}
-                  className="w-full"
                 >
                   Delete Expense
                 </Button>
@@ -194,24 +193,24 @@ const confirmDeleteExpense = async () => {
           />
         </div>
 
-        {/* ---------- Budget Controls (Advanced / Optional) ---------- */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+        {/* ---------- Budget Controls ---------- */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-800">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
               Manage Budgets
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Optional limits to help control spending
             </p>
           </div>
 
           {/* Budget Scope */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
               Budget Type
             </label>
 
-            <div className="flex gap-6 text-sm">
+            <div className="flex gap-6 text-sm text-slate-700 dark:text-slate-300">
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -242,12 +241,22 @@ const confirmDeleteExpense = async () => {
                   key={cat}
                   className="flex items-center justify-between gap-4"
                 >
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
                     {cat}
                   </span>
 
                   <input
-                    className="w-28 rounded-md border border-slate-300 px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="
+                      w-28
+                      rounded-md
+                      border border-slate-300 dark:border-slate-700
+                      bg-white dark:bg-slate-900
+                      px-2 py-1
+                      text-right text-sm
+                      text-slate-800 dark:text-slate-100
+                      focus:outline-none
+                      focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400
+                    "
                     placeholder="₹5000"
                     value={
                       budgetInputs[cat] ??
@@ -298,12 +307,12 @@ const confirmDeleteExpense = async () => {
 
       {/* ================= RIGHT: CONTEXT PANEL ================= */}
       <div className="space-y-6">
-        <h2 className="text-lg font-semibold text-slate-800">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
           Existing Expenses
         </h2>
 
         {expenses.length === 0 ? (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-400 dark:text-slate-500">
             No expenses yet.
           </p>
         ) : (
@@ -320,16 +329,24 @@ const confirmDeleteExpense = async () => {
                   }
                   navigate(`/add/${expense.$id}`);
                 }}
-                className={`cursor-pointer rounded-lg border p-4 transition hover:bg-slate-50 ${
-                  expenseId === expense.$id
-                    ? "border-indigo-500 bg-indigo-50"
-                    : "border-slate-200 bg-white"
-                }`}
+                className={`
+                  cursor-pointer
+                  rounded-lg
+                  border
+                  p-4
+                  transition
+                  hover:bg-slate-50 dark:hover:bg-slate-800
+                  ${
+                    expenseId === expense.$id
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                  }
+                `}
               >
-                <p className="font-medium text-slate-800">
+                <p className="font-medium text-slate-800 dark:text-slate-100">
                   {expense.title}
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   ₹{expense.amount} • {expense.category}
                 </p>
               </li>
