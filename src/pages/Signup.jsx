@@ -32,72 +32,75 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-50 to-violet-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow border border-indigo-100">
-        <div className="flex justify-center mb-5">
-          <Logo variant="brand" />
-        </div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
 
-        <h2 className="text-xl font-semibold text-center text-indigo-800">
-          Create your account
-        </h2>
-        <p className="text-sm text-indigo-500 text-center mb-6">
-          One step closer to smarter expense tracking
-        </p>
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Logo variant="brand" />
+          </div>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">
-            {error}
-          </p>
-        )}
+          {/* Header */}
+          <div className="space-y-1 text-center">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Create your account
+            </h2>
+            <p className="text-sm text-slate-500">
+              Start tracking your expenses smarter
+            </p>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="text"
-            placeholder="Full name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            intent="primary"
-          />
+          {/* Error */}
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 text-center">
+              {error}
+            </div>
+          )}
 
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            intent="primary"
-          />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              type="text"
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-          <Input
-            type="password"
-            placeholder="Create password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            intent="primary"
-          />
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          <div className="flex justify-center pt-3">
+            <Input
+              type="password"
+              placeholder="Create password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
             <Button
               type="submit"
-              variant="solid"
-              color="indigo"
-              size="lg"
+              className="w-full"
               disabled={loading}
             >
               {loading ? "Creating account..." : "Create account"}
             </Button>
-          </div>
-        </form>
+          </form>
 
-        <p className="text-sm text-center mt-6 text-indigo-600">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="font-medium hover:underline"
-          >
-            Login
-          </Link>
-        </p>
+          {/* Footer */}
+          <p className="text-sm text-center text-slate-600">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-indigo-600 font-medium hover:underline"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

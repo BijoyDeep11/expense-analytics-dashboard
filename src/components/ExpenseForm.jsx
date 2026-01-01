@@ -14,8 +14,8 @@ const ExpenseForm = ({
   initialData = null,
   onSubmit,
   loading,
-  onChange,      // ✅ ADD
-  extraAction,   // ✅ ADD
+  onChange,
+  extraAction,
 }) => {
   const [form, setForm] = useState({
     title: "",
@@ -49,7 +49,7 @@ const ExpenseForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <Input
         label="Title"
         name="title"

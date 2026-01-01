@@ -31,63 +31,68 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-sm border border-slate-100">
-        <div className="flex justify-center mb-5">
-          <Logo variant="minimal" />
-        </div>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
+          
+          {/* Logo */}
+          <div className="flex justify-center">
+            <Logo variant="minimal" />
+          </div>
 
-        <h2 className="text-xl font-semibold text-center text-slate-800">
-          Welcome back
-        </h2>
-        <p className="text-sm text-slate-500 text-center mb-6">
-          Login to continue where you left off
-        </p>
+          {/* Header */}
+          <div className="space-y-1 text-center">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Welcome back
+            </h2>
+            <p className="text-sm text-slate-500">
+              Login to continue where you left off
+            </p>
+          </div>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">
-            {error}
-          </p>
-        )}
+          {/* Error */}
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 text-center">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            intent="neutral"
-          />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            intent="neutral"
-          />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-          <div className="flex justify-center pt-2">
             <Button
               type="submit"
-              variant="outline"
-              color="slate"
+              className="w-full"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Login"}
             </Button>
-          </div>
-        </form>
+          </form>
 
-        <p className="text-sm text-center mt-6 text-slate-600">
-          Don’t have an account?{" "}
-          <Link
-            to="/signup"
-            className="text-blue-600 font-medium hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
+          {/* Footer */}
+          <p className="text-sm text-center text-slate-600">
+            Don’t have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-indigo-600 font-medium hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

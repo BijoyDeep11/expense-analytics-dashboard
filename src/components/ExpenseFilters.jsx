@@ -7,32 +7,36 @@ export default function ExpenseFilters({
   months = [],
 }) {
   return (
-    <div className="flex gap-4 mb-6">
+    <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
       {/* Category Filter */}
-      <Select
-        label="Category"
-        value={filters.category}
-        options={categories}
-        onChange={(e) =>
-          onChange({
-            ...filters,
-            category: e.target.value,
-          })
-        }
-      />
+      <div className="w-full sm:max-w-xs">
+        <Select
+          label="Category"
+          value={filters.category}
+          options={categories}
+          onChange={(e) =>
+            onChange({
+              ...filters,
+              category: e.target.value,
+            })
+          }
+        />
+      </div>
 
       {/* Month Filter */}
-      <Select
-        label="Month"
-        value={filters.month}
-        options={months}
-        onChange={(e) =>
-          onChange({
-            ...filters,
-            month: e.target.value,
-          })
-        }
-      />
+      <div className="w-full sm:max-w-xs">
+        <Select
+          label="Month"
+          value={filters.month}
+          options={months}
+          onChange={(e) =>
+            onChange({
+              ...filters,
+              month: e.target.value,
+            })
+          }
+        />
+      </div>
     </div>
   );
 }

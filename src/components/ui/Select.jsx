@@ -15,11 +15,11 @@ const Select = React.forwardRef(function Select(
     props.value === "" || props.value === undefined;
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-1">
       {label && (
         <label
           htmlFor={id}
-          className="block text-sm font-medium text-gray-700 mb-1 pl-1"
+          className="block text-sm font-medium text-slate-700"
         >
           {label}
         </label>
@@ -33,25 +33,46 @@ const Select = React.forwardRef(function Select(
             w-full
             px-4
             py-3
+            pr-10
             rounded-lg
-            bg-gray-50
-            text-gray-900
+
+            bg-white
+            text-slate-900
             border
-            outline-none
             appearance-none
             cursor-pointer
+
             transition-all
             duration-200
+
             ${
               error
-                ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                : "border-gray-200 focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
+                ? `
+                  border-red-500
+                  focus:ring-2
+                  focus:ring-red-500
+                  focus:border-red-500
+                `
+                : `
+                  border-slate-200
+                  hover:border-slate-300
+                  focus:border-indigo-600
+                  focus:ring-2
+                  focus:ring-indigo-500
+                `
             }
+
+            focus:outline-none
+
+            disabled:bg-slate-100
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+
             ${className}
           `}
           {...props}
         >
-          {/* ✅ Placeholder ONLY when no value is selected */}
+          {/* Placeholder only when empty */}
           {showPlaceholder && (
             <option value="">
               Select
@@ -69,7 +90,7 @@ const Select = React.forwardRef(function Select(
         </select>
 
         {/* Chevron */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
           <svg
             className="h-4 w-4"
             viewBox="0 0 20 20"
@@ -85,7 +106,7 @@ const Select = React.forwardRef(function Select(
       </div>
 
       {error && (
-        <p className="mt-1 text-xs text-red-600 pl-1">
+        <p className="text-xs text-red-600">
           {error}
         </p>
       )}

@@ -127,18 +127,31 @@ const confirmDeleteExpense = async () => {
 
 
   return (
-    <Layout>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* ================= LEFT: ADD / EDIT FORM ================= */}
-        <div>
-          <h2 className="text-xl font-semibold mb-6">
-            {isEditMode ? "Edit Expense" : "Add Expense"}
-          </h2>
+  <Layout>
+    {/* ================= PAGE HEADER ================= */}
+    <div className="mb-8">
+      <h1 className="text-2xl font-semibold text-slate-900">
+        {isEditMode ? "Edit Expense" : "Add Expense"}
+      </h1>
+      <p className="text-sm text-slate-500">
+        {isEditMode
+          ? "Update details or delete this expense"
+          : "Log a new expense and manage budgets"}
+      </p>
+    </div>
 
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      {/* ================= LEFT: PRIMARY WORKBENCH ================= */}
+      <div className="lg:col-span-2 space-y-10">
+        {/* ---------- Expense Form Card ---------- */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
           {isEditMode && initialData && (
-            <p className="text-sm text-slate-500 mb-4">
-              Editing: <span className="font-medium">{initialData.title}</span>
-            </p>
+            <div className="mb-4 text-sm text-slate-500">
+              Editing:{" "}
+              <span className="font-medium text-slate-800">
+                {initialData.title}
+              </span>
+            </div>
           )}
 
           <ExpenseForm
@@ -179,52 +192,68 @@ const confirmDeleteExpense = async () => {
               )
             }
           />
+        </div>
 
+        {/* ---------- Budget Controls (Advanced / Optional) ---------- */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800">
+              Manage Budgets
+            </h3>
+            <p className="text-sm text-slate-500">
+              Optional limits to help control spending
+            </p>
+          </div>
 
-          {/* ---------- Budget UI (UNCHANGED) ---------- */}
-          <div className="mt-10 max-w-md">
+          {/* Budget Scope */}
+          <div>
             <label className="block text-sm font-medium mb-2">
               Budget Type
             </label>
 
-            <div className="flex gap-4 text-sm">
-              <label>
+            <div className="flex gap-6 text-sm">
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   checked={budgetScope === "global"}
                   onChange={() => setBudgetScope("global")}
-                />{" "}
+                />
                 Global
               </label>
 
-              <label>
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   checked={budgetScope === "monthly"}
                   onChange={() => setBudgetScope("monthly")}
-                />{" "}
+                />
                 Monthly override
               </label>
             </div>
           </div>
 
-          <div className="mt-6 max-w-md rounded-lg border bg-white p-5">
-            <h3 className="mb-4 font-semibold">
-              Manage Budgets (Optional)
-            </h3>
-
+          {/* Budget Inputs */}
+          <div className="space-y-3">
             {categories.map((cat) => {
               const existing = getBudgetForCategory(cat);
 
               return (
-                <div key={cat} className="flex justify-between mb-3">
-                  <span>{cat}</span>
+                <div
+                  key={cat}
+                  className="flex items-center justify-between gap-4"
+                >
+                  <span className="text-sm text-slate-700">
+                    {cat}
+                  </span>
+
                   <input
-                    className="w-28 border px-2 py-1 text-right"
+                    className="w-28 rounded-md border border-slate-300 px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="₹5000"
                     value={
                       budgetInputs[cat] ??
-                      (existing ? formatCurrency(existing.limit) : "")
+                      (existing
+                        ? formatCurrency(existing.limit)
+                        : "")
                     }
                     onChange={(e) =>
                       setBudgetInputs((p) => ({
@@ -233,91 +262,97 @@ const confirmDeleteExpense = async () => {
                       }))
                     }
                     onBlur={async () => {
-                    const limit = parseCurrency(budgetInputs[cat] ?? "");
-                    if (!limit) return;
+                      const limit = parseCurrency(
+                        budgetInputs[cat] ?? ""
+                      );
+                      if (!limit) return;
 
-                    const key = `${cat}-${budgetScope}-${budgetScope === "monthly" ? selectedMonth : "global"}`;
+                      const key = `${cat}-${budgetScope}-${budgetScope === "monthly" ? selectedMonth : "global"}`;
 
-                    // 🛑 Prevent duplicate save
-                    if (lastSavedBudgetRef.current[key] === limit) return;
+                      if (lastSavedBudgetRef.current[key] === limit)
+                        return;
 
-                    lastSavedBudgetRef.current[key] = limit;
+                      lastSavedBudgetRef.current[key] = limit;
 
-                    await budgetService.upsertBudget({
-                      userId: user.$id,
-                      category: cat,
-                      limit,
-                      month:
-                        budgetScope === "monthly"
-                          ? selectedMonth
-                          : null,
-                    });
+                      await budgetService.upsertBudget({
+                        userId: user.$id,
+                        category: cat,
+                        limit,
+                        month:
+                          budgetScope === "monthly"
+                            ? selectedMonth
+                            : null,
+                      });
 
-                    const updated = await budgetService.getBudgets(user.$id);
-                    setBudgets(updated);
-                  }}
-
+                      const updated =
+                        await budgetService.getBudgets(user.$id);
+                      setBudgets(updated);
+                    }}
                   />
                 </div>
               );
             })}
           </div>
         </div>
-
-        {/* ================= RIGHT: EDIT EXPENSE LIST ================= */}
-        <div>
-          <h2 className="text-xl font-semibold mb-6">
-            Edit Existing Expense
-          </h2>
-
-          {expenses.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              No expenses yet.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {expenses.map((expense) => (
-                <li
-                  key={expense.$id}
-                  onClick={() => {
-                    if (isDirty) {
-                      const confirmLeave = window.confirm(
-                        "You have unsaved changes. Discard them and continue?"
-                      );
-                      if (!confirmLeave) return;
-                    }
-
-                    navigate(`/add/${expense.$id}`);
-                  }}
-                  className={`cursor-pointer rounded-lg border p-4 bg-white hover:bg-slate-50 ${
-                    expenseId === expense.$id
-                      ? "border-indigo-500"
-                      : "border-slate-200"
-                  }`}
-                >
-                  <p className="font-medium">{expense.title}</p>
-                  <p className="text-sm text-slate-500">
-                    ₹{expense.amount} • {expense.category}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
       </div>
 
-      <ConfirmModal
-        open={showDeleteConfirm}
-        title="Delete expense?"
-        message="This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        loading={loading}
-        onCancel={() => setShowDeleteConfirm(false)}
-        onConfirm={confirmDeleteExpense}
-      />
-    </Layout>
-  );
+      {/* ================= RIGHT: CONTEXT PANEL ================= */}
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold text-slate-800">
+          Existing Expenses
+        </h2>
+
+        {expenses.length === 0 ? (
+          <p className="text-sm text-slate-400">
+            No expenses yet.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {expenses.map((expense) => (
+              <li
+                key={expense.$id}
+                onClick={() => {
+                  if (isDirty) {
+                    const confirmLeave = window.confirm(
+                      "You have unsaved changes. Discard them and continue?"
+                    );
+                    if (!confirmLeave) return;
+                  }
+                  navigate(`/add/${expense.$id}`);
+                }}
+                className={`cursor-pointer rounded-lg border p-4 transition hover:bg-slate-50 ${
+                  expenseId === expense.$id
+                    ? "border-indigo-500 bg-indigo-50"
+                    : "border-slate-200 bg-white"
+                }`}
+              >
+                <p className="font-medium text-slate-800">
+                  {expense.title}
+                </p>
+                <p className="text-sm text-slate-500">
+                  ₹{expense.amount} • {expense.category}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+
+    {/* ================= DELETE CONFIRM ================= */}
+    <ConfirmModal
+      open={showDeleteConfirm}
+      title="Delete expense?"
+      message="This action cannot be undone."
+      confirmText="Delete"
+      cancelText="Cancel"
+      loading={loading}
+      onCancel={() => setShowDeleteConfirm(false)}
+      onConfirm={confirmDeleteExpense}
+    />
+  </Layout>
+);
+
 };
 
 export default AddExpense;

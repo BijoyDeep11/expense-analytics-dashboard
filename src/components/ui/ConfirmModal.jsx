@@ -11,31 +11,60 @@ const ConfirmModal = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onCancel}
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-slate-800">
-          {title}
-        </h3>
+      <div
+        className="
+          relative
+          w-full
+          max-w-md
+          rounded-xl
+          bg-white
+          p-6
+          shadow-xl
+          border
+          border-slate-200
+          animate-[scaleIn_0.15s_ease-out]
+        "
+      >
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-slate-900">
+            {title}
+          </h3>
 
-        {message && (
-          <p className="mt-2 text-sm text-slate-600">
-            {message}
-          </p>
-        )}
+          {message && (
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {message}
+            </p>
+          )}
+        </div>
 
         <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="
+              flex-1
+              rounded-lg
+              border
+              border-slate-200
+              px-4
+              py-2.5
+              text-sm
+              font-medium
+              text-slate-700
+              hover:bg-slate-50
+              transition
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+            "
           >
             {cancelText}
           </button>
@@ -44,12 +73,41 @@ const ConfirmModal = ({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+            className="
+              flex-1
+              rounded-lg
+              bg-red-500
+              px-4
+              py-2.5
+              text-sm
+              font-medium
+              text-white
+              hover:bg-red-600
+              transition
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+            "
           >
-            {confirmText}
+            {loading ? "Please wait..." : confirmText}
           </button>
         </div>
       </div>
+
+      {/* Animation keyframe */}
+      <style>
+        {`
+          @keyframes scaleIn {
+            from {
+              opacity: 0;
+              transform: scale(0.96);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };

@@ -13,39 +13,46 @@ const Navbar = () => {
   const isActive = (path) =>
     location.pathname === path
       ? "text-indigo-600 font-medium"
-      : "text-slate-600 hover:text-slate-800";
+      : "text-slate-600 hover:text-slate-900";
 
   return (
-    <nav className="sticky top-0 z-10 bg-white border-b border-slate-100">
+    <nav className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Left: Logo */}
+        
+        {/* Left: Brand */}
         <div className="flex items-center gap-2">
           <Logo variant="minimal" />
-          <span className="text-lg font-semibold text-slate-800">
+          <span className="text-lg font-semibold text-slate-900">
             ExpenseDash
           </span>
         </div>
 
         {/* Center: Navigation */}
-        <div className="flex gap-6">
-          <Link to="/" className={isActive("/")}>
+        <div className="flex items-center gap-8 text-sm">
+          <Link
+            to="/"
+            className={`${isActive("/")} transition-colors`}
+          >
             Dashboard
           </Link>
-          <Link to="/add" className={isActive("/add")}>
+
+          <Link
+            to="/add"
+            className={`${isActive("/add")} transition-colors`}
+          >
             Add Expense
           </Link>
         </div>
 
         {/* Right: User + Logout */}
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-500">
+          <span className="hidden sm:block text-sm text-slate-500">
             {user.email}
           </span>
+
           <Button
-            size="sm"
-            variant="outline"
-            color="red"
-            className="bg-red-500 text-white hover:bg-red-600"
+            type="button"
+            className="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800"
             onClick={logout}
           >
             Logout
