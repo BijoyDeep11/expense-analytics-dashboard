@@ -10,7 +10,13 @@ const categories = [
   { label: "Other", value: "Other" },
 ];
 
-const ExpenseForm = ({ initialData = null, onSubmit, loading }) => {
+const ExpenseForm = ({
+  initialData = null,
+  onSubmit,
+  loading,
+  onChange,      // ✅ ADD
+  extraAction,   // ✅ ADD
+}) => {
   const [form, setForm] = useState({
     title: "",
     amount: "",
@@ -31,7 +37,7 @@ const ExpenseForm = ({ initialData = null, onSubmit, loading }) => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-      onChange?.();
+    onChange?.();
   };
 
   const handleSubmit = (e) => {
@@ -79,9 +85,21 @@ const ExpenseForm = ({ initialData = null, onSubmit, loading }) => {
         required
       />
 
-      <Button type="submit" loading={loading}>
-        Save Expense
-      </Button>
+      <div className="mt-4 flex gap-3">
+        <Button
+          type="submit"
+          loading={loading}
+          className="flex-1"
+        >
+          Save Expense
+        </Button>
+
+        {extraAction && (
+          <div className="flex-1">
+            {extraAction}
+          </div>
+        )}
+      </div>
     </form>
   );
 };

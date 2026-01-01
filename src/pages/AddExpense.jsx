@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
 import { budgetService } from "../services/budgetService";
+import Button from "../components/ui/Button";
 
 import Layout from "../components/Layout";
 import ExpenseForm from "../components/ExpenseForm";
@@ -140,7 +141,7 @@ const handleDeleteExpense = async () => {
           <ExpenseForm
             loading={loading}
             initialData={initialData}
-              onChange={() => setIsDirty(true)}
+            onChange={() => setIsDirty(true)}
             onSubmit={async (data) => {
               setLoading(true);
               try {
@@ -161,18 +162,21 @@ const handleDeleteExpense = async () => {
                 setLoading(false);
               }
             }}
+            extraAction={
+              isEditMode && (
+                <Button
+                  type="button"
+                  bgColor="bg-red-500"
+                  loading={loading}
+                  onClick={handleDeleteExpense}
+                  className="w-full"
+                >
+                  Delete Expense
+                </Button>
+              )
+            }
           />
 
-          {isEditMode && (
-            <button
-              type="button"
-              disabled={loading}
-              onClick={handleDeleteExpense}
-              className="mt-4 w-full rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-            >
-              Delete Expense
-            </button>
-          )}
 
           {/* ---------- Budget UI (UNCHANGED) ---------- */}
           <div className="mt-10 max-w-md">
