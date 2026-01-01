@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { expenseService } from "../services/expenseService";
 import { budgetService } from "../services/budgetService";
 import Button from "../components/ui/Button";
-
+import ConfirmModal from "../components/ui/ConfirmModal";
 import Layout from "../components/Layout";
 import ExpenseForm from "../components/ExpenseForm";
 
@@ -20,6 +20,8 @@ const AddExpense = () => {
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
 
   // -----------------------------
   // Load all expenses (RIGHT PANEL)
@@ -51,29 +53,30 @@ const AddExpense = () => {
 }, [expenseId]);
 
 
-const handleDeleteExpense = async () => {
+const handleDeleteExpense = () => {
+  setShowDeleteConfirm(true);
+};
+
+const confirmDeleteExpense = async () => {
   if (!expenseId) return;
 
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this expense?"
-  );
-
-  if (!confirmDelete) return;
-
   try {
+    setLoading(true);
     await expenseService.deleteExpense(expenseId);
 
     setExpenses((prev) =>
       prev.filter((e) => e.$id !== expenseId)
     );
 
-    // ✅ reset edit state
     setInitialData(null);
     setIsDirty(false);
+    setShowDeleteConfirm(false);
 
     navigate("/add");
   } catch (err) {
     console.error("Failed to delete expense", err);
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -302,6 +305,17 @@ const handleDeleteExpense = async () => {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={showDeleteConfirm}
+        title="Delete expense?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={loading}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmDeleteExpense}
+      />
     </Layout>
   );
 };
