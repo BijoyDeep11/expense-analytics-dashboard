@@ -11,6 +11,8 @@ const Select = React.forwardRef(function Select(
   ref
 ) {
   const id = useId();
+  const showPlaceholder =
+    props.value === "" || props.value === undefined;
 
   return (
     <div className="w-full">
@@ -49,9 +51,18 @@ const Select = React.forwardRef(function Select(
           `}
           {...props}
         >
-          <option value="">Select</option>
+          {/* ✅ Placeholder ONLY when no value is selected */}
+          {showPlaceholder && (
+            <option value="">
+              Select
+            </option>
+          )}
+
           {options.map((option) => (
-            <option key={option.value ?? option} value={option.value ?? option}>
+            <option
+              key={option.value ?? option}
+              value={option.value ?? option}
+            >
               {option.label ?? option}
             </option>
           ))}
@@ -59,7 +70,11 @@ const Select = React.forwardRef(function Select(
 
         {/* Chevron */}
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-          <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
             <path
               fillRule="evenodd"
               clipRule="evenodd"

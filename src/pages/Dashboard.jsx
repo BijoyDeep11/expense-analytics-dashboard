@@ -119,6 +119,37 @@ const Dashboard = () => {
     categoryTrendInsight
   } = analytics;
 
+  const categoryOptions = [
+  { label: "All Categories", value: "all" },
+  { label: "Food", value: "Food" },
+  { label: "Travel", value: "Travel" },
+  { label: "Shopping", value: "Shopping" },
+  { label: "Other", value: "Other" },
+];
+
+
+const monthOptions = useMemo(() => {
+  const months = new Set();
+
+  expenses.forEach((e) => {
+    const d = new Date(e.date);
+    const key = d.toLocaleString("default", {
+      month: "short",
+      year: "numeric",
+    });
+    months.add(key);
+  });
+
+  return [
+    { label: "All Months", value: "all" },
+    ...Array.from(months).map((m) => ({
+      label: m,
+      value: m,
+    })),
+  ];
+}, [expenses]);
+
+
 return (
     <Layout>
       {/* Header */}
@@ -136,7 +167,8 @@ return (
         <ExpenseFilters
           filters={filters}
           onChange={setFilters}
-          categories={categories}
+          categories={categoryOptions}
+          months={monthOptions}
         />
       </div>
 
