@@ -15,6 +15,31 @@ const COLORS = [
   "#a855f7", // violet
 ];
 
+/* ---------------------------------------
+   Custom Tooltip (FIXED + PRECISE)
+---------------------------------------- */
+const CategoryTooltip = ({ active, payload }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const { category, amount } = payload[0].payload;
+
+  return (
+    <div
+      className="
+        rounded-lg
+        bg-slate-900 dark:bg-slate-100
+        px-3 py-2
+        text-xs
+        text-white dark:text-slate-900
+        shadow-lg
+      "
+    >
+      <p className="font-medium">{category}</p>
+      <p className="opacity-80">₹{amount}</p>
+    </div>
+  );
+};
+
 const CategoryChart = ({ data }) => {
   const chartData = Object.entries(data).map(
     ([category, amount]) => ({
@@ -77,6 +102,9 @@ const CategoryChart = ({ data }) => {
               outerRadius={90}
               innerRadius={55}
               paddingAngle={2}
+              isAnimationActive
+              animationDuration={300}
+              stroke="transparent"
             >
               {chartData.map((_, index) => (
                 <Cell
@@ -86,19 +114,8 @@ const CategoryChart = ({ data }) => {
               ))}
             </Pie>
 
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#020617", // slate-950
-                borderRadius: "8px",
-                border: "1px solid #334155", // slate-700
-                fontSize: "12px",
-                color: "#e5e7eb",
-              }}
-              labelStyle={{
-                color: "#e5e7eb",
-              }}
-              formatter={(value) => [`₹${value}`, "Amount"]}
-            />
+            {/* ✅ FIXED TOOLTIP */}
+            <Tooltip content={<CategoryTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
