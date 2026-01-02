@@ -63,10 +63,14 @@ const handleDeleteExpense = () => {
 const confirmDeleteExpense = async () => {
   if (!expenseId) return;
 
+  // 🔁 Keep a snapshot for undo
+  const deletedExpense = initialData;
+
   try {
     setLoading(true);
     await expenseService.deleteExpense(expenseId);
 
+    // Optimistic UI update (already correct)
     setExpenses((prev) =>
       prev.filter((e) => e.$id !== expenseId)
     );
@@ -75,9 +79,37 @@ const confirmDeleteExpense = async () => {
     setIsDirty(false);
     setShowDeleteConfirm(false);
 
+    // ✅ UNDO TOAST
+    showToast(
+      "Expense deleted",
+      {
+        actionText: "Undo",
+        onAction: async () => {
+          try {
+            await expenseService.createExpense({
+              ...deletedExpense,
+              userId: user.$id,
+            });
+
+            // Restore in UI
+            setExpenses((prev) => [
+              deletedExpense,
+              ...prev,
+            ]);
+
+            showToast("Expense restored ✅");
+          } catch (err) {
+            console.error("Failed to restore expense", err);
+            showToast("Failed to restore expense ❌");
+          }
+        },
+      }
+    );
+
     navigate("/add");
   } catch (err) {
     console.error("Failed to delete expense", err);
+    showToast("Failed to delete expense ❌");
   } finally {
     setLoading(false);
   }
@@ -160,9 +192,13 @@ return (
           <ExpenseForm
             loading={loading}
             initialData={initialData}
-            onChange={() => setIsDirty(true)}
+            onChange={() => {
+              setIsDirty(true);
+              window.__FORM_DIRTY__ = true; // ✅ keep CTA in sync
+            }}
             onSubmit={async (data) => {
               setLoading(true);
+              window.__FORM_LOADING__ = true;
               try {
                 if (isEditMode) {
                   await expenseService.updateExpense(expenseId, data);
@@ -173,7 +209,7 @@ return (
                   });
                 }
 
-                // ✅ SUCCESS TOAST (ADD THIS)
+                // ✅ SUCCESS TOAST
                 showToast(
                   isEditMode
                     ? "Expense updated successfully ✅"
@@ -181,12 +217,20 @@ return (
                 );
 
                 setIsDirty(false);
+                window.__FORM_DIRTY__ = false; // ✅ reset CTA state
                 setInitialData(null);
                 navigate("/add");
               } catch (err) {
                 console.error("Failed to save expense", err);
+
+                showToast(
+                  isEditMode
+                    ? "Failed to update expense ❌"
+                    : "Failed to add expense ❌"
+                );
               } finally {
                 setLoading(false);
+                window.__FORM_LOADING__ = false;
               }
             }}
             extraAction={

@@ -6,10 +6,14 @@ const ToastContext = createContext(null);
 export const ToastProvider = ({ children }) => {
   const [message, setMessage] = useState("");
 
-  const showToast = (msg, duration = 2000) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), duration);
-  };
+  const showToast = (msg, options = {}) => {
+  setMessage({ text: msg, ...options });
+
+  setTimeout(() => {
+    setMessage("");
+  }, 3000);
+};
+
 
   return (
     <ToastContext.Provider value={{ showToast }}>

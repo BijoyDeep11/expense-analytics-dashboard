@@ -1,6 +1,8 @@
 const Toast = ({ message }) => {
   if (!message) return null;
 
+  const { text, actionText, onAction } = message;
+
   return (
     <div
       className="
@@ -14,7 +16,23 @@ const Toast = ({ message }) => {
         animate-[toastIn_0.25s_ease-out]
       "
     >
-      {message}
+      <div className="flex items-center gap-4">
+        <span>{text}</span>
+
+        {actionText && onAction && (
+          <button
+            onClick={onAction}
+            className="
+              font-medium
+              underline
+              hover:opacity-80
+              focus:outline-none
+            "
+          >
+            {actionText}
+          </button>
+        )}
+      </div>
 
       <style>
         {`

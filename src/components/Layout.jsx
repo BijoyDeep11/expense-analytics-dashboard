@@ -50,9 +50,11 @@ const Layout = ({ children }) => {
           {isAddPage ? (
             <button
               onClick={handleSave}
+              disabled={!window.__FORM_DIRTY__ || window.__FORM_LOADING__}
               className="
                 flex w-full items-center justify-center gap-2
                 rounded-xl
+
                 bg-emerald-600 dark:bg-emerald-500
                 px-6 py-4
                 text-white font-medium
@@ -61,10 +63,35 @@ const Layout = ({ children }) => {
                 transition
                 hover:bg-emerald-500 dark:hover:bg-emerald-400
                 active:scale-[0.98]
+
+                disabled:opacity-50
+                disabled:shadow-none
+                disabled:active:scale-100
+                disabled:hover:bg-emerald-600
+                dark:disabled:hover:bg-emerald-500
               "
             >
-              💾 Save Expense
+              {window.__FORM_LOADING__ ? (
+                <>
+                  <span
+                    className="
+                      h-4 w-4
+                      animate-spin
+                      rounded-full
+                      border-2
+                      border-white/40
+                      border-t-white
+                    "
+                  />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  💾 Save Expense
+                </>
+              )}
             </button>
+
           ) : (
             <Link
               to="/add"
