@@ -24,7 +24,7 @@ const ExpenseList = ({ expenses }) => {
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-3 overflow-x-auto overscroll-x-contain">
       {expenses.map((expense) => (
         <li
           key={expense.$id}

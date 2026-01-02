@@ -25,7 +25,7 @@ const Navbar = () => {
         border-b border-slate-200 dark:border-slate-800
       "
     >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         
         {/* Left: Brand */}
         <div className="flex items-center gap-2">
@@ -35,8 +35,8 @@ const Navbar = () => {
           </span>
         </div>
 
-        {/* Center: Navigation */}
-        <div className="flex items-center gap-8 text-sm">
+        {/* Center: Navigation (desktop only) */}
+        <div className="hidden sm:flex items-center gap-8 text-sm">
           <Link
             to="/"
             className={`${isActive("/")} transition-colors`}

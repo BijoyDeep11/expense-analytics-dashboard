@@ -49,7 +49,7 @@ const ExpenseForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5 text-base">
       <Input
         label="Title"
         name="title"

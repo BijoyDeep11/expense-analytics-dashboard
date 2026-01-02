@@ -7,6 +7,8 @@ import Button from "../components/ui/Button";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Layout from "../components/Layout";
 import ExpenseForm from "../components/ExpenseForm";
+import { useToast } from "../context/ToastContext";
+
 
 const categories = ["Food", "Travel", "Shopping", "Other"];
 
@@ -21,6 +23,7 @@ const AddExpense = () => {
   const [initialData, setInitialData] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { showToast } = useToast();
 
 
   // -----------------------------
@@ -142,7 +145,7 @@ return (
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-[fadeInUp_0.25s_ease-out]">
       {/* ================= LEFT: PRIMARY WORKBENCH ================= */}
-      <div className="lg:col-span-2 space-y-10">
+      <div className="lg:col-span-2 space-y-10 order-1 lg:order-0">
         {/* ---------- Expense Form Card ---------- */}
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
           {isEditMode && initialData && (
@@ -169,6 +172,14 @@ return (
                     userId: user.$id,
                   });
                 }
+
+                // ✅ SUCCESS TOAST (ADD THIS)
+                showToast(
+                  isEditMode
+                    ? "Expense updated successfully ✅"
+                    : "Expense added successfully ✅"
+                );
+
                 setIsDirty(false);
                 setInitialData(null);
                 navigate("/add");
@@ -191,6 +202,7 @@ return (
               )
             }
           />
+
         </div>
 
         {/* ---------- Budget Controls ---------- */}
@@ -210,7 +222,7 @@ return (
               Budget Type
             </label>
 
-            <div className="flex gap-6 text-sm text-slate-700 dark:text-slate-300">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-sm text-slate-700 dark:text-slate-300">
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -306,7 +318,7 @@ return (
       </div>
 
       {/* ================= RIGHT: CONTEXT PANEL ================= */}
-      <div className="space-y-6">
+      <div className="space-y-6 order-2 lg:order-0">
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
           Existing Expenses
         </h2>
