@@ -12,6 +12,16 @@
       <stop stop-color="#FCD34D" offset="0%" />
       <stop stop-color="#F59E0B" offset="100%" />
     </radialGradient>
+
+    <style>
+      /* Default Color (Light Mode): Dark Slate */
+      .hisaab-text { fill: #1E293B; }
+      
+      /* Dark Mode Color: Soft White (The one you asked for) */
+      @media (prefers-color-scheme: dark) {
+        .hisaab-text { fill: #CBD5E1; }
+      }
+    </style>
   </defs>
 
   <g transform="translate(0, 4)">
@@ -24,7 +34,7 @@
     <ellipse cx="15" cy="14.5" rx="1.5" ry="1" fill="white" fill-opacity="0.5" />
   </g>
 
-  <text x="36" y="26" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="#1E293B">
+  <text x="36" y="26" font-family="Arial, sans-serif" font-weight="bold" font-size="20" class="hisaab-text">
     Hisaab<tspan fill="#4F46E5">Se</tspan>
   </text>
 </svg>
