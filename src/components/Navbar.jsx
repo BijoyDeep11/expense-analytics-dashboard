@@ -30,9 +30,6 @@ const Navbar = () => {
         {/* Left: Brand */}
         <div className="flex items-center gap-2">
           <Logo variant="minimal" />
-          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            HisaabSe
-          </span>
         </div>
 
         {/* Center: Navigation (desktop only) */}
