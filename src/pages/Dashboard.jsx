@@ -30,18 +30,8 @@ const Dashboard = () => {
     month: "all",
   });
 
-  const now = new Date();
   const selectedMonth =
-    filters.month === "all"
-      ? null
-      : new Date(
-          now.getFullYear(),
-          Number(filters.month)
-        ).toLocaleString("default", {
-          month: "short",
-          year: "numeric",
-        });
-
+  filters.month === "all" ? null : filters.month;
 
   useEffect(() => {
       budgetService
@@ -93,12 +83,16 @@ const Dashboard = () => {
       }
 
       if (filters.month !== "all") {
-        const d = new Date(expense.date);
-        if (d.getMonth().toString() !== filters.month) {
-          return false;
-        }
-      }
+      const d = new Date(expense.date);
+      const monthKey = d.toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
 
+      if (monthKey !== filters.month) {
+        return false;
+      }
+    }
       return true;
     });
   }, [expenses, filters]);

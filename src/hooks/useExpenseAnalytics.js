@@ -1,8 +1,32 @@
-export function useExpenseAnalytics(expenses, budgets = []) {
+export function useExpenseAnalytics(
+  expenses,
+  budgets = [],
+  filters = { category: "All", month: "All" }
+) {
+  // ----------------------------------------
+  // APPLY FILTERS FIRST (🔥 THIS WAS MISSING)
+  // ----------------------------------------
+  const filteredExpenses = expenses.filter((e) => {
+    const categoryMatch =
+      !filters.category ||
+      filters.category === "All" ||
+      e.category === filters.category;
+
+    const monthMatch =
+      !filters.month ||
+      filters.month === "All" ||
+      new Date(e.date).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      }) === filters.month;
+
+    return categoryMatch && monthMatch;
+  });
+
   // ----------------------------------------
   // TOTAL SPENT
   // ----------------------------------------
-  const totalAmount = expenses.reduce(
+  const totalAmount = filteredExpenses.reduce(
     (sum, e) => sum + Number(e.amount),
     0
   );
@@ -10,7 +34,7 @@ export function useExpenseAnalytics(expenses, budgets = []) {
   // ----------------------------------------
   // CATEGORY TOTALS
   // ----------------------------------------
-  const byCategory = expenses.reduce((acc, e) => {
+  const byCategory = filteredExpenses.reduce((acc, e) => {
     acc[e.category] =
       (acc[e.category] || 0) + Number(e.amount);
     return acc;
@@ -19,7 +43,7 @@ export function useExpenseAnalytics(expenses, budgets = []) {
   // ----------------------------------------
   // MONTH TOTALS
   // ----------------------------------------
-  const byMonth = expenses.reduce((acc, e) => {
+  const byMonth = filteredExpenses.reduce((acc, e) => {
     const date = new Date(e.date);
     const monthKey = date.toLocaleString("default", {
       month: "short",
@@ -77,20 +101,6 @@ export function useExpenseAnalytics(expenses, budgets = []) {
   });
 
   // ----------------------------------------
-  // INSIGHT 3: BUDGET SUMMARY
-  // ----------------------------------------
-  const overBudgetCount = Object.values(
-    budgetByCategory
-  ).filter((b) => b.overBudget).length;
-
-  const budgetSummaryInsight =
-    overBudgetCount > 0
-      ? `${overBudgetCount} categor${
-          overBudgetCount > 1 ? "ies are" : "y is"
-        } over budget this month`
-      : null;
-
-  // ----------------------------------------
   // INSIGHT 1: MONTH-OVER-MONTH
   // ----------------------------------------
   let insight = null;
@@ -113,12 +123,12 @@ export function useExpenseAnalytics(expenses, budgets = []) {
   }
 
   // ----------------------------------------
-  // INSIGHT 2: TOP CATEGORY THIS MONTH
+  // INSIGHT 2: TOP CATEGORY
   // ----------------------------------------
   let topCategoryInsight = null;
 
   if (currentMonth) {
-    const monthlyExpenses = expenses.filter((e) => {
+    const monthlyExpenses = filteredExpenses.filter((e) => {
       const d = new Date(e.date);
       return (
         d.toLocaleString("default", {
@@ -145,7 +155,21 @@ export function useExpenseAnalytics(expenses, budgets = []) {
   }
 
   // ----------------------------------------
-  // INSIGHT 4: CATEGORY TREND (MoM)
+  // INSIGHT 3: BUDGET SUMMARY
+  // ----------------------------------------
+  const overBudgetCount = Object.values(
+    budgetByCategory
+  ).filter((b) => b.overBudget).length;
+
+  const budgetSummaryInsight =
+    overBudgetCount > 0
+      ? `${overBudgetCount} categor${
+          overBudgetCount > 1 ? "ies are" : "y is"
+        } over budget this month`
+      : null;
+
+  // ----------------------------------------
+  // INSIGHT 4: CATEGORY TREND
   // ----------------------------------------
   let categoryTrendInsight = null;
 
@@ -154,7 +178,7 @@ export function useExpenseAnalytics(expenses, budgets = []) {
     const prev = months[months.length - 2];
 
     const sumByCategory = (month) =>
-      expenses.reduce((acc, e) => {
+      filteredExpenses.reduce((acc, e) => {
         const d = new Date(e.date);
         if (
           d.toLocaleString("default", {
