@@ -1,49 +1,56 @@
 export function useExpenseAnalytics(
-  expenses,
+  expenses = [],
   budgets = [],
-  filters = { category: "All", month: "All" }
+  categories = []
 ) {
   // ----------------------------------------
-  // APPLY FILTERS FIRST (🔥 THIS WAS MISSING)
+  // GUARD: no expenses → return empty analytics
   // ----------------------------------------
-  const filteredExpenses = expenses.filter((e) => {
-    const categoryMatch =
-      !filters.category ||
-      filters.category === "All" ||
-      e.category === filters.category;
+  if (!expenses || expenses.length === 0) {
+    const emptyByCategory = {};
 
-    const monthMatch =
-      !filters.month ||
-      filters.month === "All" ||
-      new Date(e.date).toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      }) === filters.month;
+    // still return ALL categories with 0
+    (categories || []).forEach((c) => {
+      emptyByCategory[c.name] = 0;
+    });
 
-    return categoryMatch && monthMatch;
-  });
+    return {
+      totalAmount: 0,
+      byCategory: emptyByCategory,
+      byMonth: {},
+      budgetByCategory: {},
+      insight: null,
+      topCategoryInsight: null,
+      budgetSummaryInsight: null,
+      categoryTrendInsight: null,
+    };
+  }
 
   // ----------------------------------------
   // TOTAL SPENT
   // ----------------------------------------
-  const totalAmount = filteredExpenses.reduce(
+  const totalAmount = expenses.reduce(
     (sum, e) => sum + Number(e.amount),
     0
   );
 
   // ----------------------------------------
-  // CATEGORY TOTALS
+  // CATEGORY TOTALS (DRIVEN BY DB CATEGORIES)
   // ----------------------------------------
-  const byCategory = filteredExpenses.reduce((acc, e) => {
-    acc[e.category] =
-      (acc[e.category] || 0) + Number(e.amount);
-    return acc;
-  }, {});
+  const byCategory = {};
+
+  (categories || []).forEach((cat) => {
+    const total = (expenses || [])
+      .filter((e) => e.category === cat.name)
+      .reduce((sum, e) => sum + Number(e.amount), 0);
+
+    byCategory[cat.name] = total;
+  });
 
   // ----------------------------------------
   // MONTH TOTALS
   // ----------------------------------------
-  const byMonth = filteredExpenses.reduce((acc, e) => {
+  const byMonth = expenses.reduce((acc, e) => {
     const date = new Date(e.date);
     const monthKey = date.toLocaleString("default", {
       month: "short",
@@ -123,12 +130,12 @@ export function useExpenseAnalytics(
   }
 
   // ----------------------------------------
-  // INSIGHT 2: TOP CATEGORY
+  // INSIGHT 2: TOP CATEGORY (CURRENT MONTH)
   // ----------------------------------------
   let topCategoryInsight = null;
 
   if (currentMonth) {
-    const monthlyExpenses = filteredExpenses.filter((e) => {
+    const monthlyExpenses = expenses.filter((e) => {
       const d = new Date(e.date);
       return (
         d.toLocaleString("default", {
@@ -178,7 +185,7 @@ export function useExpenseAnalytics(
     const prev = months[months.length - 2];
 
     const sumByCategory = (month) =>
-      filteredExpenses.reduce((acc, e) => {
+      expenses.reduce((acc, e) => {
         const d = new Date(e.date);
         if (
           d.toLocaleString("default", {

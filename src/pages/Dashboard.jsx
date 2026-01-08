@@ -56,8 +56,8 @@ useEffect(() => {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const res = await expenseService.getExpenses(user.$id);
-        setExpenses(res.documents);
+        const docs = await expenseService.getExpenses(user.$id);
+        setExpenses(docs);
       } catch (err) {
         console.error("Failed to fetch expenses", err);
       } finally {
@@ -105,8 +105,8 @@ useEffect(() => {
 
   // Analytics (based on filtered data)
   const analytics = useMemo(() => {
-    return useExpenseAnalytics(filteredExpenses, budgets);
-  }, [filteredExpenses, budgets]);
+    return useExpenseAnalytics(filteredExpenses, budgets, categories);
+  }, [filteredExpenses, budgets, categories]);
 
   const {
     totalAmount,

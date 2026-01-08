@@ -60,6 +60,11 @@ const ExpenseForm = ({
     const name = newCategoryName.trim();
     if (!name) return;
 
+    if (typeof onCreateCategory !== "function") {
+    console.error("onCreateCategory not provided to ExpenseForm");
+    return;
+  }
+
     try {
       const created = await onCreateCategory(name);
 

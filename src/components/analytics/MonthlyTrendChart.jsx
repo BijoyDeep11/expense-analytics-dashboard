@@ -8,15 +8,31 @@ import {
   CartesianGrid,
 } from "recharts";
 
+/* ---------------------------------------
+   Deterministic color for bars
+---------------------------------------- */
+const getBarColor = () =>
+  "hsl(231, 84%, 60%)"; // matches indigo tone, stable & branded
+
 const MonthlyTrendChart = ({ data }) => {
-  const chartData = Object.entries(data).map(
+  // ----------------------------------------
+  // Normalize data: { Jan 2025: 1200 } → [{month, amount}]
+  // ----------------------------------------
+  const chartData = Object.entries(data || {}).map(
     ([month, amount]) => ({
       month,
       amount,
     })
   );
 
-  if (chartData.length === 0) {
+  // ----------------------------------------
+  // Check if there is any real spending
+  // ----------------------------------------
+  const hasSpending = chartData.some(
+    (d) => d.amount > 0
+  );
+
+  if (!hasSpending) {
     return (
       <div
         className="
@@ -28,7 +44,7 @@ const MonthlyTrendChart = ({ data }) => {
         "
       >
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          No monthly data available
+          No monthly data yet
         </p>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
           Add expenses to see spending trends over time
@@ -97,8 +113,10 @@ const MonthlyTrendChart = ({ data }) => {
 
             <Bar
               dataKey="amount"
-              fill="#6366f1"
+              fill={getBarColor()}
               radius={[6, 6, 0, 0]}
+              isAnimationActive
+              animationDuration={300}
             />
           </BarChart>
         </ResponsiveContainer>

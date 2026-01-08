@@ -251,12 +251,13 @@ const AddExpense = () => {
   // Load all expenses
   // -----------------------------
   useEffect(() => {
-    const loadExpenses = async () => {
-      const res = await expenseService.getExpenses(user.$id);
-      setExpenses(res.documents);
-    };
-    loadExpenses();
-  }, [user.$id]);
+  const loadExpenses = async () => {
+    const docs = await expenseService.getExpenses(user.$id);
+    setExpenses(docs);
+  };
+  loadExpenses();
+}, [user.$id]);
+
 
   // -----------------------------
   // Load expense into form (EDIT)
@@ -402,57 +403,75 @@ const AddExpense = () => {
             )}
 
             <ExpenseForm
-              loading={loading}
-              initialData={initialData}
-              categories={categories}
-              onChange={() => setIsDirty(true)}
-              onSubmit={async (data) => {
-                setLoading(true);
-                try {
-                  if (isEditMode) {
-                    await expenseService.updateExpense(
-                      expenseId,
-                      data
-                    );
-                  } else {
-                    await expenseService.createExpense({
-                      ...data,
-                      userId: user.$id,
-                    });
-                  }
+            loading={loading}
+            initialData={initialData}
+            categories={categories}
 
-                  showToast(
-                    isEditMode
-                      ? "Expense updated successfully ✅"
-                      : "Expense added successfully ✅"
-                  );
+            onCreateCategory={async (name) => {
+              try {
+                const created = await categoryService.createCategory({
+                  userId: user.$id,
+                  name,
+                  isDefault: false,
+                });
 
-                  setIsDirty(false);
-                  setInitialData(null);
-                  navigate("/add");
-                } catch (err) {
-                  console.error(
-                    "Failed to save expense",
-                    err
-                  );
-                  showToast("Save failed ❌");
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              extraAction={
-                isEditMode && (
-                  <Button
-                    type="button"
-                    bgColor="bg-red-500"
-                    loading={loading}
-                    onClick={handleDeleteExpense}
-                  >
-                    Delete Expense
-                  </Button>
-                )
+                // keep UI in sync
+                setCategories((prev) => [...prev, created]);
+
+                showToast(`Category "${name}" added ✅`);
+
+                return created;   // 🔑 this is critical
+              } catch (err) {
+                console.error("Failed to create category", err);
+                showToast("Failed to create category ❌");
+                throw err;
               }
-            />
+            }}
+
+            onChange={() => setIsDirty(true)}
+
+            onSubmit={async (data) => {
+              setLoading(true);
+              try {
+                if (isEditMode) {
+                  await expenseService.updateExpense(expenseId, data);
+                } else {
+                  await expenseService.createExpense({
+                    ...data,
+                    userId: user.$id,
+                  });
+                }
+
+                showToast(
+                  isEditMode
+                    ? "Expense updated successfully ✅"
+                    : "Expense added successfully ✅"
+                );
+
+                setIsDirty(false);
+                setInitialData(null);
+                navigate("/add");
+              } catch (err) {
+                console.error("Failed to save expense", err);
+                showToast("Save failed ❌");
+              } finally {
+                setLoading(false);
+              }
+            }}
+
+            extraAction={
+              isEditMode && (
+                <Button
+                  type="button"
+                  bgColor="bg-red-500"
+                  loading={loading}
+                  onClick={handleDeleteExpense}
+                >
+                  Delete Expense
+                </Button>
+              )
+            }
+          />
           </div>
 
           {/* MANAGE CATEGORIES */}

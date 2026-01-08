@@ -6,22 +6,19 @@ import {
   Tooltip,
 } from "recharts";
 
-const COLORS = [
-  "#6366f1", // indigo
-  "#22c55e", // emerald
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#06b6d4", // cyan
-  "#a855f7", // violet
-];
+/* ---------------------------------------
+   Infinite color generator (no repeats)
+---------------------------------------- */
+const getColor = (index) =>
+  `hsl(${(index * 137.5) % 360}, 70%, 55%)`;
 
 /* ---------------------------------------
-   Custom Tooltip (FIXED + PRECISE)
+   Custom Tooltip
 ---------------------------------------- */
 const CategoryTooltip = ({ active, payload }) => {
   if (!active || !payload || !payload.length) return null;
 
-  const { category, amount } = payload[0].payload;
+  const { name, value } = payload[0].payload;
 
   return (
     <div
@@ -34,21 +31,31 @@ const CategoryTooltip = ({ active, payload }) => {
         shadow-lg
       "
     >
-      <p className="font-medium">{category}</p>
-      <p className="opacity-80">₹{amount}</p>
+      <p className="font-medium">{name}</p>
+      <p className="opacity-80">₹{value}</p>
     </div>
   );
 };
 
 const CategoryChart = ({ data }) => {
-  const chartData = Object.entries(data).map(
-    ([category, amount]) => ({
-      category,
-      amount,
+  // ----------------------------------------
+  // Normalize data: { Food: 1200 } → [{name, value}]
+  // ----------------------------------------
+  const chartData = Object.entries(data || {}).map(
+    ([name, value]) => ({
+      name,
+      value,
     })
   );
 
-  if (chartData.length === 0) {
+  // ----------------------------------------
+  // Check if there is any real spending
+  // ----------------------------------------
+  const hasSpending = chartData.some(
+    (d) => d.value > 0
+  );
+
+  if (!hasSpending) {
     return (
       <div
         className="
@@ -60,10 +67,10 @@ const CategoryChart = ({ data }) => {
         "
       >
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          No data available
+          No spending data yet
         </p>
         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          Try adjusting filters to see category breakdown
+          Add expenses to see category distribution
         </p>
       </div>
     );
@@ -89,35 +96,60 @@ const CategoryChart = ({ data }) => {
         </p>
       </div>
 
-      {/* Chart */}
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={chartData}
-              dataKey="amount"
-              nameKey="category"
-              cx="50%"
-              cy="50%"
-              outerRadius={90}
-              innerRadius={55}
-              paddingAngle={2}
-              isAnimationActive
-              animationDuration={300}
-              stroke="transparent"
-            >
-              {chartData.map((_, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
+      {/* Chart + Legend Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Chart */}
+        <div className="md:col-span-2 h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                innerRadius={55}
+                paddingAngle={2}
+                isAnimationActive
+                animationDuration={300}
+                stroke="transparent"
+              >
+                {chartData.map((_, index) => (
+                  <Cell
+                    key={index}
+                    fill={getColor(index)}
+                  />
+                ))}
+              </Pie>
 
-            {/* ✅ FIXED TOOLTIP */}
-            <Tooltip content={<CategoryTooltip />} />
-          </PieChart>
-        </ResponsiveContainer>
+              <Tooltip content={<CategoryTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Legend (color + text = zero confusion) */}
+        <div className="space-y-2 text-sm">
+          {chartData.map((item, index) => (
+            <div
+              key={item.name}
+              className="flex items-center gap-2"
+            >
+              <span
+                className="h-3 w-3 rounded-full shrink-0"
+                style={{
+                  backgroundColor: getColor(index),
+                }}
+              />
+              <span className="flex-1 text-slate-700 dark:text-slate-300 truncate">
+                {item.name}
+              </span>
+              <span className="text-slate-500 dark:text-slate-400">
+                ₹{item.value}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
