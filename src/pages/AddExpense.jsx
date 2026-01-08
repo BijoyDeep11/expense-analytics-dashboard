@@ -562,6 +562,178 @@ const AddExpense = () => {
         </div>
       </div>
 
+      {/* ================= BUDGET CONTROLS ================= */}
+      <div className="mt-6 space-y-4 max-w-2xl">
+        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          Set Budgets
+        </h4>
+
+        {/* Scope Toggle */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-600 dark:text-slate-400">
+            Scope:
+          </span>
+
+          <div className="flex rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setBudgetScope("global")}
+              className={`px-3 py-1.5 text-sm transition ${
+                budgetScope === "global"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+              }`}
+            >
+              Global
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setBudgetScope("monthly")}
+              className={`px-3 py-1.5 text-sm transition ${
+                budgetScope === "monthly"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+              }`}
+            >
+              Monthly
+            </button>
+          </div>
+
+          {/* Month selector only when monthly */}
+          {budgetScope === "monthly" && (
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="
+                ml-3
+                rounded-md border
+                border-slate-300 dark:border-slate-700
+                bg-white dark:bg-slate-900
+                px-2 py-1.5
+                text-sm
+              "
+            >
+              {Array.from({ length: 12 }).map((_, i) => {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+
+                const key = d.toLocaleString("default", {
+                  month: "short",
+                  year: "numeric",
+                });
+
+                return (
+                  <option key={key} value={key}>
+                    {key}
+                  </option>
+                );
+              })}
+            </select>
+          )}
+        </div>
+
+        {/* Category Budgets */}
+        <div className="space-y-3 pt-2">
+          {(categories || []).length === 0 ? (
+            <p className="text-sm text-slate-400">
+              No categories yet.
+            </p>
+          ) : (
+            (categories || []).map((cat) => {
+              const budget = getBudgetForCategory(cat.name);
+              const inputKey = `${cat.name}-${budgetScope}-${selectedMonth}`;
+
+              return (
+                <div
+                  key={cat.$id}
+                  className="
+                    flex items-center gap-3
+                    rounded-lg border
+                    border-slate-200 dark:border-slate-800
+                    px-3 py-2
+                    max-w-xl
+                  "
+                >
+                  {/* Category name */}
+                  <div className="w-28 text-sm font-medium text-slate-800 dark:text-slate-100">
+                    {cat.name}
+                  </div>
+
+                  {/* Budget input */}
+                  <input
+                    type="text"
+                    placeholder="₹0"
+                    value={budgetInputs[inputKey] ?? (budget ? formatCurrency(budget.limit) : "")}
+                    onChange={(e) =>
+                      setBudgetInputs((prev) => ({
+                        ...prev,
+                        [inputKey]: e.target.value,
+                      }))
+                    }
+                    className="
+                      flex-1
+                      rounded-md border
+                      border-slate-300 dark:border-slate-700
+                      bg-white dark:bg-slate-900
+                      px-2 py-1.5
+                      text-sm
+                    "
+                  />
+
+                  {/* Save button */}
+                  <button
+                    onClick={async () => {
+                      const raw = budgetInputs[inputKey];
+                      const limit = parseCurrency(raw);
+
+                      if (!limit) {
+                        showToast("Enter a valid amount");
+                        return;
+                      }
+
+                      try {
+                        await budgetService.upsertBudget({
+                          userId: user.$id,
+                          category: cat.name,
+                          limit,
+                          month:
+                            budgetScope === "monthly"
+                              ? selectedMonth
+                              : null,
+                        });
+
+                        const refreshed =
+                          await budgetService.getBudgets(user.$id);
+                        setBudgets(refreshed);
+
+                        showToast(
+                          `Budget saved for ${cat.name} ✅`
+                        );
+                      } catch (err) {
+                        console.error("Failed to save budget", err);
+                        showToast("Failed to save budget ❌");
+                      }
+                    }}
+                    className="
+                      rounded-md
+                      bg-indigo-600
+                      px-3 py-1.5
+                      text-sm text-white
+                      hover:bg-indigo-700
+                      transition
+                    "
+                  >
+                    {budget ? "Update" : "Set"}
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+
       {/* DELETE EXPENSE CONFIRM */}
       <ConfirmModal
         open={showDeleteConfirm}
