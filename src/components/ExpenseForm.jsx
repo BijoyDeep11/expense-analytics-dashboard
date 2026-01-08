@@ -3,19 +3,13 @@ import Input from "./ui/Input";
 import Select from "./ui/Select";
 import Button from "./ui/Button";
 
-const categories = [
-  { label: "Food", value: "Food" },
-  { label: "Travel", value: "Travel" },
-  { label: "Shopping", value: "Shopping" },
-  { label: "Other", value: "Other" },
-];
-
 const ExpenseForm = ({
   initialData = null,
   onSubmit,
   loading,
   onChange,
   extraAction,
+  categories = [], // ✅ dynamic categories from DB
 }) => {
   const [form, setForm] = useState({
     title: "",
@@ -70,10 +64,13 @@ const ExpenseForm = ({
       <Select
         label="Category"
         name="category"
-        options={categories}
         value={form.category}
         onChange={handleChange}
         required
+        options={categories.map((c) => ({
+          label: c.name,
+          value: c.name,
+        }))}
       />
 
       <Input
@@ -86,24 +83,23 @@ const ExpenseForm = ({
       />
 
       {/* ===== Actions ===== */}
-    <div className="mt-6 flex items-center gap-3">
-      {/* Primary action */}
-      <Button
-        type="submit"
-        loading={loading}
-        className="px-8"
-      >
-        Save Expense
-      </Button>
+      <div className="mt-6 flex items-center gap-3">
+        {/* Primary action */}
+        <Button
+          type="submit"
+          loading={loading}
+          className="px-8"
+        >
+          Save Expense
+        </Button>
 
-      {/* Destructive action – close but secondary */}
-      {extraAction && (
-        <div className="opacity-90">
-          {extraAction}
-        </div>
-      )}
-    </div>
-
+        {/* Destructive action – close but secondary */}
+        {extraAction && (
+          <div className="opacity-90">
+            {extraAction}
+          </div>
+        )}
+      </div>
     </form>
   );
 };

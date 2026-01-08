@@ -8,6 +8,7 @@ import ExpenseFilters from "../components/ExpenseFilters";
 import { useExpenseAnalytics } from "../hooks/useExpenseAnalytics";
 import MonthlyTrendChart from "../components/analytics/MonthlyTrendChart";
 import { budgetService } from "../services/budgetService";
+import { categoryService } from "../services/categoryService";
 
 
 const Dashboard = () => {
@@ -15,7 +16,17 @@ const Dashboard = () => {
 
   const [budgets, setBudgets] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [categories, setCategories] = useState([]); // ✅ DB categories
   const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  if (!user?.$id) return;
+
+  categoryService
+    .getCategories(user.$id)
+    .then(setCategories)
+    .catch(console.error);
+}, [user?.$id]);
 
   const formatCurrency = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -69,11 +80,6 @@ const Dashboard = () => {
   }
 }, []);
 
-  // Derived categories
-  const categories = useMemo(() => {
-    return [...new Set(expenses.map((e) => e.category))];
-  }, [expenses]);
-
   // Filtered expenses
   const filteredExpenses = useMemo(() => {
     return expenses.filter((expense) => {
@@ -113,13 +119,15 @@ const Dashboard = () => {
     categoryTrendInsight
   } = analytics;
 
-  const categoryOptions = [
-  { label: "All Categories", value: "all" },
-  { label: "Food", value: "Food" },
-  { label: "Travel", value: "Travel" },
-  { label: "Shopping", value: "Shopping" },
-  { label: "Other", value: "Other" },
-];
+const categoryOptions = useMemo(() => {
+  return [
+    { label: "All Categories", value: "all" },
+    ...categories.map((c) => ({
+      label: c.name,
+      value: c.name,
+    })),
+  ];
+}, [categories]);
 
 
 const monthOptions = useMemo(() => {

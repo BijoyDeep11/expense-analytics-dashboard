@@ -8,9 +8,7 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import Layout from "../components/Layout";
 import ExpenseForm from "../components/ExpenseForm";
 import { useToast } from "../context/ToastContext";
-
-
-const categories = ["Food", "Travel", "Shopping", "Other"];
+import { categoryService } from "../services/categoryService";
 
 const AddExpense = () => {
   const { user } = useAuth();
@@ -22,8 +20,143 @@ const AddExpense = () => {
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [categories, setCategories] = useState([]); // already added earlier
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { showToast } = useToast();
+  const [reassignTarget, setReassignTarget] = useState("");
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+
+useEffect(() => {
+  if (!user?.$id) return;
+
+  const loadCategories = async () => {
+    try {
+      const res = await categoryService.getCategories(user.$id);
+      setCategories(res);
+    } catch (err) {
+      console.error("Failed to load categories", err);
+    }
+  };
+
+  loadCategories();
+}, [user?.$id]);
+
+
+const handleAddCategory = async () => {
+
+ const exists = categories.some(
+      (c) => c.name.toLowerCase() === name.toLowerCase()
+    ); 
+
+if (exists) {
+  showToast(`"${name}" already exists`);
+  return;
+}
+
+  const name = newCategory.trim();
+  if (!name) return;
+
+  try {
+    const created = await categoryService.createCategory({
+      userId: user.$id,
+      name,
+      isDefault: false,
+    });
+
+    setCategories((prev) => [...prev, created]);
+    setNewCategory("");
+    showToast(`Category "${name}" added ✅`);
+  } catch (err) {
+    console.error("Failed to add category", err);
+    showToast("Failed to add category ❌");
+  }
+};
+
+const handleDeleteCategory = async (cat) => {
+  if (cat.isDefault) {
+    showToast("Default categories can’t be deleted");
+    return;
+  }
+
+  const inUse = expenses.some(
+    (e) => e.category === cat.name
+  );
+
+  // If in use, open reassign flow
+  if (inUse) {
+    setCategoryToDelete(cat);
+    setReassignTarget("");
+    return;
+  }
+
+  // Safe delete (not in use)
+  try {
+    await categoryService.deleteCategory(cat.$id);
+    setCategories((prev) =>
+      prev.filter((c) => c.$id !== cat.$id)
+    );
+    showToast(`Category "${cat.name}" deleted 🗑️`);
+  } catch (err) {
+    console.error("Failed to delete category", err);
+    showToast("Failed to delete category ❌");
+  }
+};
+
+const confirmReassignAndDelete = async () => {
+  if (!categoryToDelete || !reassignTarget) {
+    showToast("Select a category first");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // 1. Update all expenses
+    const affected = expenses.filter(
+      (e) => e.category === categoryToDelete.name
+    );
+
+    await Promise.all(
+      affected.map((e) =>
+        expenseService.updateExpense(e.$id, {
+          category: reassignTarget,
+        })
+      )
+    );
+
+    // 2. Delete the category
+    await categoryService.deleteCategory(
+      categoryToDelete.$id
+    );
+
+    // 3. Update UI state
+    setExpenses((prev) =>
+      prev.map((e) =>
+        e.category === categoryToDelete.name
+          ? { ...e, category: reassignTarget }
+          : e
+      )
+    );
+
+    setCategories((prev) =>
+      prev.filter((c) => c.$id !== categoryToDelete.$id)
+    );
+
+    showToast(
+      `Moved expenses to "${reassignTarget}" and deleted "${categoryToDelete.name}" ✅`
+    );
+
+    setCategoryToDelete(null);
+    setReassignTarget("");
+  } catch (err) {
+    console.error("Reassign failed", err);
+    showToast("Failed to reassign expenses ❌");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   // -----------------------------
@@ -192,6 +325,7 @@ return (
           <ExpenseForm
             loading={loading}
             initialData={initialData}
+            categories={categories}
             onChange={() => {
               setIsDirty(true);
               window.__FORM_DIRTY__ = true; // ✅ keep CTA in sync
@@ -249,6 +383,74 @@ return (
 
         </div>
 
+
+        {/* ================= Manage Categories ================= */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+              Manage Categories
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Create or remove your own expense categories
+            </p>
+          </div>
+
+          {/* Add category */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="New category name"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="
+                flex-1
+                rounded-md
+                border border-slate-300 dark:border-slate-700
+                bg-white dark:bg-slate-900
+                px-3 py-2
+                text-sm
+                text-slate-800 dark:text-slate-100
+                focus:outline-none
+                focus:ring-2 focus:ring-indigo-500
+              "
+            />
+            <Button onClick={handleAddCategory}>
+              Add
+            </Button>
+          </div>
+
+          {/* Category list */}
+          <ul className="space-y-2">
+            {categories.map((cat) => (
+              <li
+                key={cat.$id}
+                className="
+                  flex items-center justify-between
+                  rounded-md
+                  border border-slate-200 dark:border-slate-800
+                  px-3 py-2
+                "
+              >
+                <span className="text-sm text-slate-700 dark:text-slate-300">
+                  {cat.name}
+                </span>
+
+                <button
+                  disabled={cat.isDefault}
+                  onClick={() => handleDeleteCategory(cat)}
+                  className={`text-sm ${
+                    cat.isDefault
+                      ? "text-slate-400 cursor-not-allowed"
+                      : "text-red-600 hover:text-red-700"
+                  }`}
+                >
+                  {cat.isDefault ? "Default" : "Delete"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {/* ---------- Budget Controls ---------- */}
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-6">
           <div>
@@ -290,15 +492,16 @@ return (
           {/* Budget Inputs */}
           <div className="space-y-3">
             {categories.map((cat) => {
-              const existing = getBudgetForCategory(cat);
+              const name = cat.name; // ✅ string category name
+              const existing = getBudgetForCategory(name);
 
               return (
                 <div
-                  key={cat}
+                  key={cat.$id || name}
                   className="flex items-center justify-between gap-4"
                 >
                   <span className="text-sm text-slate-700 dark:text-slate-300">
-                    {cat}
+                    {name}
                   </span>
 
                   <input
@@ -315,24 +518,26 @@ return (
                     "
                     placeholder="₹5000"
                     value={
-                      budgetInputs[cat] ??
-                      (existing
-                        ? formatCurrency(existing.limit)
-                        : "")
+                      budgetInputs[name] ??
+                      (existing ? formatCurrency(existing.limit) : "")
                     }
                     onChange={(e) =>
                       setBudgetInputs((p) => ({
                         ...p,
-                        [cat]: e.target.value,
+                        [name]: e.target.value,
                       }))
                     }
                     onBlur={async () => {
                       const limit = parseCurrency(
-                        budgetInputs[cat] ?? ""
+                        budgetInputs[name] ?? ""
                       );
                       if (!limit) return;
 
-                      const key = `${cat}-${budgetScope}-${budgetScope === "monthly" ? selectedMonth : "global"}`;
+                      const key = `${name}-${budgetScope}-${
+                        budgetScope === "monthly"
+                          ? selectedMonth
+                          : "global"
+                      }`;
 
                       if (lastSavedBudgetRef.current[key] === limit)
                         return;
@@ -341,7 +546,7 @@ return (
 
                       await budgetService.upsertBudget({
                         userId: user.$id,
-                        category: cat,
+                        category: name, // ✅ string, not object
                         limit,
                         month:
                           budgetScope === "monthly"
@@ -423,6 +628,60 @@ return (
       onCancel={() => setShowDeleteConfirm(false)}
       onConfirm={confirmDeleteExpense}
     />
+
+    {categoryToDelete && (
+    <ConfirmModal
+      open={true}
+      title={`Delete "${categoryToDelete.name}"?`}
+      message={
+        <div className="space-y-3">
+          <p>
+            This category is used by existing expenses.
+            Choose where to move them:
+          </p>
+
+          <select
+            value={reassignTarget}
+            onChange={(e) =>
+              setReassignTarget(e.target.value)
+            }
+            className="
+              w-full
+              rounded-md
+              border border-slate-300
+              px-3 py-2
+              text-sm
+              focus:outline-none
+              focus:ring-2 focus:ring-indigo-500
+            "
+          >
+            <option value="">
+              Select category
+            </option>
+
+            {categories
+              .filter(
+                (c) =>
+                  c.$id !== categoryToDelete.$id
+              )
+              .map((c) => (
+                <option key={c.$id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+          </select>
+        </div>
+      }
+      confirmText="Reassign & Delete"
+      cancelText="Cancel"
+      loading={loading}
+      onCancel={() => {
+        setCategoryToDelete(null);
+        setReassignTarget("");
+      }}
+      onConfirm={confirmReassignAndDelete}
+    />
+  )}
   </Layout>
 );
 

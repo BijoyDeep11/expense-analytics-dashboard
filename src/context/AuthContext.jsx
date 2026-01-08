@@ -1,6 +1,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { account } from "../services/appwrite";
 import { ID } from "appwrite";
+import { categoryService } from "../services/categoryService";
+
+
+async function seedDefaultCategories(userId) {
+  const defaults = ["Food", "Travel", "Shopping", "Other"];
+
+  for (const name of defaults) {
+    try {
+      await categoryService.createCategory({
+        userId,
+        name,
+        isDefault: true,
+      });
+    } catch (err) {
+      // If it already exists (unique index), ignore
+      console.log("Category already exists:", name);
+    }
+  }
+}
+
 
 const AuthContext = createContext();
 
@@ -24,10 +44,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    await account.createEmailPasswordSession(email, password);
-    const accountDetails = await account.get();
-    setUser(accountDetails);
-  };
+  await account.createEmailPasswordSession(email, password);
+  const accountDetails = await account.get();
+  setUser(accountDetails);
+
+  // 🌱 Seed default categories for this user
+  await seedDefaultCategories(accountDetails.$id);
+};
+
 
   const signup = async (email, password, name) => {
     await account.create(ID.unique(), email, password, name);
