@@ -82,7 +82,7 @@ useEffect(() => {
 
   // Filtered expenses
   const filteredExpenses = useMemo(() => {
-    return expenses.filter((expense) => {
+    return (expenses || []).filter((expense) => {
       if (filters.category !== "all" &&
           expense.category !== filters.category) {
         return false;
@@ -133,7 +133,7 @@ const categoryOptions = useMemo(() => {
 const monthOptions = useMemo(() => {
   const months = new Set();
 
-  expenses.forEach((e) => {
+  (expenses || []).forEach((e) => {
     const d = new Date(e.date);
     const key = d.toLocaleString("default", {
       month: "short",
