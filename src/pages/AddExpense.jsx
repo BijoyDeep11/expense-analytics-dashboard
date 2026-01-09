@@ -10,6 +10,27 @@ import ExpenseForm from "../components/ExpenseForm";
 import { useToast } from "../context/ToastContext";
 import { categoryService } from "../services/categoryService";
 
+// -----------------------------
+// Helpers
+// -----------------------------
+function getWeeksOfMonth(year, monthIndex) {
+  const weeks = [];
+  const firstDay = new Date(year, monthIndex, 1);
+  const lastDay = new Date(year, monthIndex + 1, 0);
+
+  let start = new Date(firstDay);
+  let week = 1;
+
+  while (start <= lastDay) {
+    weeks.push(week);
+    start.setDate(start.getDate() + 7);
+    week++;
+  }
+
+  return weeks;
+}
+
+
 const AddExpense = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -339,6 +360,8 @@ const AddExpense = () => {
   const [budgetScope, setBudgetScope] = useState("monthly"); 
 // weekly | monthly | quarterly | yearly
 
+  const [selectedWeek, setSelectedWeek] = useState(1);
+
 const [periodKey, setPeriodKey] = useState(() => {
   const d = new Date();
   return d.toLocaleString("default", {
@@ -355,13 +378,20 @@ const [periodKey, setPeriodKey] = useState(() => {
       .catch(console.error);
   }, [user.$id]);
 
-  const getBudgetForCategory = (category) =>
-  budgets.find(
+  const getBudgetForCategory = (category) => {
+  const key =
+    budgetScope === "weekly"
+      ? `${periodKey}-W${selectedWeek}`
+      : periodKey;
+
+  return budgets.find(
     (b) =>
       b.category === category &&
       b.periodType === budgetScope &&
-      b.periodKey === periodKey
+      b.periodKey === key
   );
+};
+
 
 
   const formatCurrency = (value) =>
@@ -577,18 +607,18 @@ const [periodKey, setPeriodKey] = useState(() => {
           </span>
 
           <div className="flex rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700">
-            {["weekly", "monthly", "quarterly", "yearly"].map((scope) => (
+            {["weekly", "monthly", "quarterly", "yearly"].map((s) => (
               <button
-                key={scope}
+                key={s}
                 type="button"
-                onClick={() => setBudgetScope(scope)}
+                onClick={() => setBudgetScope(s)}
                 className={`px-3 py-1.5 text-sm transition ${
-                  budgetScope === scope
+                  budgetScope === s
                     ? "bg-indigo-600 text-white"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                {scope[0].toUpperCase() + scope.slice(1)}
+                {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
@@ -608,11 +638,11 @@ const [periodKey, setPeriodKey] = useState(() => {
             >
 
               {budgetScope === "monthly" &&
-                Array.from({ length: 12 }).map((_, i) => {
-                  const d = new Date();
-                  d.setMonth(d.getMonth() - i);
+              Array.from({ length: 12 }).map((_, i) => {
+                const d = new Date();
+                d.setMonth(d.getMonth() + i);   // 🔥 future months
 
-                  const key = d.toLocaleString("default", {
+                const key = d.toLocaleString("default", {
                     month: "short",
                     year: "numeric",
                   });
@@ -634,25 +664,23 @@ const [periodKey, setPeriodKey] = useState(() => {
                     </option>
                   );
                 })}
+              {budgetScope === "weekly" && (() => {
+                const [mon, yr] = periodKey.split(" ");
+                const monthIndex = new Date(`${mon} 1, ${yr}`).getMonth();
+                const year = Number(yr);
 
-              {budgetScope === "weekly" &&
-                Array.from({ length: 8 }).map((_, i) => {
-                  const d = new Date();
-                  d.setDate(d.getDate() - i * 7);
+                const weeks = getWeeksOfMonth(year, monthIndex);
 
-                  const week = `W${Math.ceil(
-                    d.getDate() / 7
-                  )}-${d.getFullYear()}`;
+                return weeks.map((w) => (
+                  <option key={w} value={w}>
+                    {mon} - Week {w}
+                  </option>
+                ));
+              })()}
 
-                  return (
-                    <option key={week} value={week}>
-                      {week}
-                    </option>
-                  );
-                })}
-                </select>
-                  )}
-              </div>
+            </select>
+                )}
+            </div>    
 
         {/* Category Budgets */}
         <div className="space-y-3 pt-2">
@@ -719,7 +747,10 @@ const [periodKey, setPeriodKey] = useState(() => {
                           category: cat.name,
                           limit,
                           periodType: budgetScope,
-                          periodKey,
+                          periodKey:
+                          budgetScope === "weekly"
+                            ? `${periodKey}-W${selectedWeek}`
+                            : periodKey,
                         });
                         
                         const refreshed =
