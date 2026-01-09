@@ -18,6 +18,7 @@ export function useExpenseAnalytics(
       byCategory: emptyByCategory,
       byMonth: {},
       budgetByCategory: {},
+      overallBudget: null,
       insight: null,
       topCategoryInsight: null,
       budgetSummaryInsight: null,
@@ -32,6 +33,19 @@ export function useExpenseAnalytics(
     (sum, e) => sum + Number(e.amount),
     0
   );
+
+  // ----------------------------------------
+  // get latest budget period for each type
+  // ----------------------------------------
+  const getLatestPeriodKey = (type) => {
+    const keys = budgets
+      .filter((b) => b.periodType === type)
+      .map((b) => b.periodKey);
+
+    if (keys.length === 0) return null;
+
+    return keys.sort().reverse()[0]; // latest
+  };
 
   // ----------------------------------------
   // CATEGORY TOTALS (DRIVEN BY DB CATEGORIES)
@@ -74,32 +88,23 @@ export function useExpenseAnalytics(
     })
     .sort((a, b) => a.date - b.date);
 
-  const currentMonth =
-    sortedMonths.length > 0
-      ? sortedMonths[sortedMonths.length - 1].label
-      : null;
+  // ----------------------------------------
+  // ACTIVE PERIODS (FROM BUDGETS, NOT EXPENSES)
+  // ----------------------------------------
+  const currentMonth = getLatestPeriodKey("monthly");
+  const currentQuarter = getLatestPeriodKey("quarterly");
+  const currentYear = getLatestPeriodKey("yearly");
+  const currentWeek = getLatestPeriodKey("weekly");
 
-  const currentYear = currentMonth
-    ? currentMonth.split(" ")[1]
-    : null;
-
-  const getQuarter = (monthLabel) => {
-    const [mon, yr] = monthLabel.split(" ");
-    const m = new Date(`${mon} 1, ${yr}`).getMonth() + 1;
-    const q = Math.ceil(m / 3);
-    return `Q${q}-${yr}`;
-  };
-
-  const currentQuarter =
-    currentMonth ? getQuarter(currentMonth) : null;
-
+  // ----------------------------------------
+  // OVERALL BUDGET (MONTHLY BY DEFAULT)
+  // ----------------------------------------
   const overallBudget = budgets.find(
-  (b) =>
-    b.category === "__overall__" &&
-    b.periodType === "monthly" && // or dynamic later
-    b.periodKey === currentMonth
-);
-
+    (b) =>
+      b.category === "__overall__" &&
+      b.periodType === "monthly" &&
+      b.periodKey === currentMonth
+  );
 
   // ----------------------------------------
   // BUDGET MERGE LOGIC (PERIOD BASED)
@@ -107,7 +112,13 @@ export function useExpenseAnalytics(
   const budgetByCategory = {};
 
   Object.entries(byCategory).forEach(([category, spent]) => {
-    // priority: monthly → quarterly → yearly
+    const weeklyBudget = budgets.find(
+      (b) =>
+        b.category === category &&
+        b.periodType === "weekly" &&
+        b.periodKey === currentWeek
+    );
+
     const monthlyBudget = budgets.find(
       (b) =>
         b.category === category &&
@@ -129,8 +140,12 @@ export function useExpenseAnalytics(
         b.periodKey === currentYear
     );
 
+    // priority: weekly → monthly → quarterly → yearly
     const effectiveBudget =
-      monthlyBudget || quarterlyBudget || yearlyBudget;
+      weeklyBudget ||
+      monthlyBudget ||
+      quarterlyBudget ||
+      yearlyBudget;
 
     if (!effectiveBudget) return;
 
@@ -147,7 +162,7 @@ export function useExpenseAnalytics(
       remaining,
       percentUsed: Number(percentUsed.toFixed(1)),
       overBudget: spent > limit,
-      source: effectiveBudget.periodType, // monthly | quarterly | yearly
+      source: effectiveBudget.periodType, // weekly | monthly | quarterly | yearly
     };
   });
 
@@ -299,26 +314,25 @@ export function useExpenseAnalytics(
   // RETURN ANALYTICS
   // ----------------------------------------
   return {
-  totalAmount,
-  byCategory,
-  byMonth,
-  budgetByCategory,
+    totalAmount,
+    byCategory,
+    byMonth,
+    budgetByCategory,
 
-  overallBudget: overallBudget
-  ? {
-      limit: Number(overallBudget.limit),
-      spent: totalAmount,
-      remaining:
-        Number(overallBudget.limit) - totalAmount,
-      overBudget:
-        totalAmount > Number(overallBudget.limit),
-    }
-  : null,  // 👈 new
-  
-  insight,
-  topCategoryInsight,
-  budgetSummaryInsight,
-  categoryTrendInsight,
-};
+    overallBudget: overallBudget
+      ? {
+          limit: Number(overallBudget.limit),
+          spent: totalAmount,
+          remaining:
+            Number(overallBudget.limit) - totalAmount,
+          overBudget:
+            totalAmount > Number(overallBudget.limit),
+        }
+      : null,
 
+    insight,
+    topCategoryInsight,
+    budgetSummaryInsight,
+    categoryTrendInsight,
+  };
 }
