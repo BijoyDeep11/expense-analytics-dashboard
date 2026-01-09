@@ -113,15 +113,17 @@ useEffect(() => {
   }, [filteredExpenses, budgets, categories]);
 
   const {
-    totalAmount,
-    byCategory,
-    byMonth,
-    budgetByCategory,
-    insight,
-    topCategoryInsight,
-    budgetSummaryInsight,
-    categoryTrendInsight
-  } = analytics;
+  totalAmount,
+  byCategory,
+  byMonth,
+  budgetByCategory,
+  overallBudget,   // 👈 add
+  insight,
+  topCategoryInsight,
+  budgetSummaryInsight,
+  categoryTrendInsight
+} = analytics;
+
 
 const categoryOptions = useMemo(() => {
   return [
@@ -180,6 +182,68 @@ return (
 
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
   {/* Total Spent */}
+  {/* ================= Overall Budget ================= */}
+{!loading && overallBudget && (
+  <div
+    className="
+      p-5
+      bg-indigo-50 dark:bg-indigo-950
+      border border-indigo-100 dark:border-indigo-800
+      rounded-lg
+
+      transition
+      hover:-translate-y-0.5
+      hover:shadow-md
+      dark:hover:shadow-black/40
+
+      animate-[popIn_0.2s_ease-out]
+    "
+  >
+    <p className="text-sm text-indigo-600 dark:text-indigo-300 mb-1">
+      Overall Budget
+    </p>
+
+    <p className="text-3xl font-semibold text-indigo-800 dark:text-indigo-100">
+      {formatCurrency(overallBudget.limit)}
+    </p>
+
+    <div className="mt-3">
+      <div className="h-2 w-full rounded bg-indigo-200 dark:bg-indigo-900 overflow-hidden">
+        <div
+          className={`h-full ${
+            overallBudget.overBudget
+              ? "bg-red-500 dark:bg-red-600"
+              : "bg-emerald-500 dark:bg-emerald-400"
+          }`}
+          style={{
+            width: `${Math.min(
+              (overallBudget.spent / overallBudget.limit) * 100,
+              100
+            )}%`,
+          }}
+        />
+      </div>
+
+      <p
+        className={`mt-2 text-sm ${
+          overallBudget.overBudget
+            ? "text-red-600 dark:text-red-400"
+            : "text-slate-600 dark:text-slate-400"
+        }`}
+      >
+        {overallBudget.overBudget
+          ? `Over budget by ${formatCurrency(
+              Math.abs(overallBudget.remaining)
+            )}`
+          : `${formatCurrency(
+              overallBudget.remaining
+            )} left`}
+      </p>
+    </div>
+  </div>
+)}
+
+
   {loading ? (
 <div
   className="
@@ -313,6 +377,46 @@ return (
     })
   )}
 </div>
+
+{overallBudget && (
+  <div
+    className="
+      p-5
+      bg-indigo-50 dark:bg-indigo-950
+      border border-indigo-200 dark:border-indigo-800
+      rounded-lg
+      transition
+      hover:-translate-y-0.5
+      hover:shadow-md
+    "
+  >
+    <p className="text-sm text-indigo-600 dark:text-indigo-300 mb-1">
+      Overall Budget
+    </p>
+
+    <p className="text-2xl font-semibold text-indigo-800 dark:text-indigo-100">
+      {formatCurrency(overallBudget.spent)} /{" "}
+      {formatCurrency(overallBudget.limit)}
+    </p>
+
+    <p
+      className={`mt-1 text-sm ${
+        overallBudget.overBudget
+          ? "text-red-600 dark:text-red-400"
+          : "text-slate-600 dark:text-slate-400"
+      }`}
+    >
+      {overallBudget.overBudget
+        ? `Over by ${formatCurrency(
+            Math.abs(overallBudget.remaining)
+          )}`
+        : `${formatCurrency(
+            overallBudget.remaining
+          )} left`}
+    </p>
+  </div>
+)}
+
 
 {/* ================= Category Performance ================= */}
 <div className="mb-10 grid grid-cols-1 lg:grid-cols-3 gap-6">

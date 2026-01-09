@@ -59,9 +59,11 @@ export const budgetService = {
     periodType,
     periodKey,
   }) {
+    const safeCategory =
+    category === "__overall__" ? "__overall__" : category;
     const queries = [
       Query.equal("userId", userId),
-      Query.equal("category", category),
+      Query.equal("category", safeCategory),
       Query.equal("periodType", periodType),
       Query.equal("periodKey", periodKey),
     ];
@@ -89,7 +91,7 @@ export const budgetService = {
       ID.unique(),
       {
         userId,
-        category,
+        category: safeCategory,
         limit,
         periodType,
         periodKey,

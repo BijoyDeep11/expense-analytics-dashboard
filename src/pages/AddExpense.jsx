@@ -392,6 +392,20 @@ const [periodKey, setPeriodKey] = useState(() => {
   );
 };
 
+const getOverallBudget = () => {
+  const key =
+    budgetScope === "weekly"
+      ? `${periodKey}-W${selectedWeek}`
+      : periodKey;
+
+  return budgets.find(
+    (b) =>
+      b.category === "__overall__" &&
+      b.periodType === budgetScope &&
+      b.periodKey === key
+  );
+};
+
 
 
   const formatCurrency = (value) =>
@@ -625,10 +639,17 @@ const [periodKey, setPeriodKey] = useState(() => {
 
 
           {/* Month selector only when monthly */}
+          {/* Period selector */}
           {budgetScope !== "yearly" && (
             <select
-              value={periodKey}
-              onChange={(e) => setPeriodKey(e.target.value)}
+              value={budgetScope === "weekly" ? selectedWeek : periodKey}
+              onChange={(e) => {
+                if (budgetScope === "weekly") {
+                  setSelectedWeek(Number(e.target.value));
+                } else {
+                  setPeriodKey(e.target.value);
+                }
+              }}
               className="
                 ml-3 rounded-md border
                 border-slate-300 dark:border-slate-700
@@ -636,13 +657,13 @@ const [periodKey, setPeriodKey] = useState(() => {
                 px-2 py-1.5 text-sm
               "
             >
-
+              {/* ---------- MONTHLY ---------- */}
               {budgetScope === "monthly" &&
-              Array.from({ length: 12 }).map((_, i) => {
-                const d = new Date();
-                d.setMonth(d.getMonth() + i);   // 🔥 future months
+                Array.from({ length: 12 }).map((_, i) => {
+                  const d = new Date();
+                  d.setMonth(d.getMonth() + i); // future months only
 
-                const key = d.toLocaleString("default", {
+                  const key = d.toLocaleString("default", {
                     month: "short",
                     year: "numeric",
                   });
@@ -654,16 +675,20 @@ const [periodKey, setPeriodKey] = useState(() => {
                   );
                 })}
 
+              {/* ---------- QUARTERLY ---------- */}
               {budgetScope === "quarterly" &&
                 ["Q1", "Q2", "Q3", "Q4"].map((q) => {
                   const yr = new Date().getFullYear();
                   const key = `${q}-${yr}`;
+
                   return (
                     <option key={key} value={key}>
                       {key}
                     </option>
                   );
                 })}
+
+              {/* ---------- WEEKLY ---------- */}
               {budgetScope === "weekly" && (() => {
                 const [mon, yr] = periodKey.split(" ");
                 const monthIndex = new Date(`${mon} 1, ${yr}`).getMonth();
@@ -677,11 +702,106 @@ const [periodKey, setPeriodKey] = useState(() => {
                   </option>
                 ));
               })()}
-
             </select>
-                )}
-            </div>    
+          )}
 
+            </div>
+
+        {/* ================= OVERALL BUDGET ================= */}
+        <div className="space-y-2 pt-2">
+          <h5 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Overall Budget
+          </h5>
+
+          {(() => {
+            const overallBudget = getOverallBudget();
+            const inputKey = `__overall__-${budgetScope}-${periodKey}`;
+
+            return (
+              <div
+                className="
+                  flex items-center gap-3
+                  rounded-lg border
+                  border-slate-200 dark:border-slate-800
+                  px-3 py-2
+                  max-w-xl
+                  bg-slate-50 dark:bg-slate-950
+                "
+              >
+                <div className="w-28 text-sm font-medium text-slate-800 dark:text-slate-100">
+                  Total
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="₹0"
+                  value={
+                    budgetInputs[inputKey] ??
+                    (overallBudget
+                      ? formatCurrency(overallBudget.limit)
+                      : "")
+                  }
+                  onChange={(e) =>
+                    setBudgetInputs((prev) => ({
+                      ...prev,
+                      [inputKey]: e.target.value,
+                    }))
+                  }
+                  className="
+                    flex-1
+                    rounded-md border
+                    border-slate-300 dark:border-slate-700
+                    bg-white dark:bg-slate-900
+                    px-2 py-1.5
+                    text-sm
+                  "
+                />
+
+                <button
+                  onClick={async () => {
+                    const raw = budgetInputs[inputKey];
+                    const limit = parseCurrency(raw);
+
+                    if (!limit) {
+                      showToast("Enter a valid amount");
+                      return;
+                    }
+
+                    try {
+                      await budgetService.upsertBudget({
+                        userId: user.$id,
+                        category: "__overall__",
+                        limit,
+                        periodType: budgetScope,
+                        periodKey,
+                      });
+
+                      const refreshed =
+                        await budgetService.getBudgets(user.$id);
+                      setBudgets(refreshed);
+
+                      showToast("Overall budget saved ✅");
+                    } catch (err) {
+                      console.error("Failed to save overall budget", err);
+                      showToast("Failed to save overall budget ❌");
+                    }
+                  }}
+                  className="
+                    rounded-md
+                    bg-indigo-700
+                    px-3 py-1.5
+                    text-sm text-white
+                    hover:bg-indigo-800
+                    transition
+                  "
+                >
+                  {overallBudget ? "Update" : "Set"}
+                </button>
+              </div>
+            );
+          })()}
+        </div>
+    
         {/* Category Budgets */}
         <div className="space-y-3 pt-2">
           {(categories || []).length === 0 ? (

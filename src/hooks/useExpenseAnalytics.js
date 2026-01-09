@@ -93,6 +93,14 @@ export function useExpenseAnalytics(
   const currentQuarter =
     currentMonth ? getQuarter(currentMonth) : null;
 
+  const overallBudget = budgets.find(
+  (b) =>
+    b.category === "__overall__" &&
+    b.periodType === "monthly" && // or dynamic later
+    b.periodKey === currentMonth
+);
+
+
   // ----------------------------------------
   // BUDGET MERGE LOGIC (PERIOD BASED)
   // ----------------------------------------
@@ -291,13 +299,26 @@ export function useExpenseAnalytics(
   // RETURN ANALYTICS
   // ----------------------------------------
   return {
-    totalAmount,
-    byCategory,
-    byMonth,
-    budgetByCategory,
-    insight,
-    topCategoryInsight,
-    budgetSummaryInsight,
-    categoryTrendInsight,
-  };
+  totalAmount,
+  byCategory,
+  byMonth,
+  budgetByCategory,
+
+  overallBudget: overallBudget
+  ? {
+      limit: Number(overallBudget.limit),
+      spent: totalAmount,
+      remaining:
+        Number(overallBudget.limit) - totalAmount,
+      overBudget:
+        totalAmount > Number(overallBudget.limit),
+    }
+  : null,  // 👈 new
+  
+  insight,
+  topCategoryInsight,
+  budgetSummaryInsight,
+  categoryTrendInsight,
+};
+
 }
