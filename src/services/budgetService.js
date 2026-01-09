@@ -31,18 +31,14 @@ export const budgetService = {
   },
 
   // ----------------------------------------
-  // Fetch budgets for a month (monthly + global)
+  // Fetch budgets for a period
   // ----------------------------------------
-  async getBudgetsForMonth(userId, month) {
-    const queries = [Query.equal("userId", userId)];
-
-    if (month) {
-      // Monthly budgets ONLY
-      queries.push(Query.equal("month", month));
-    } else {
-      // Global budgets ONLY
-      queries.push(Query.isNull("month"));
-    }
+  async getBudgetsForPeriod(userId, periodType, periodKey) {
+    const queries = [
+      Query.equal("userId", userId),
+      Query.equal("periodType", periodType),
+      Query.equal("periodKey", periodKey),
+    ];
 
     const res = await databases.listDocuments(
       DATABASE_ID,
@@ -56,17 +52,19 @@ export const budgetService = {
   // ----------------------------------------
   // Create or update budget (UPSERT)
   // ----------------------------------------
-  async upsertBudget({ userId, category, limit, month }) {
+  async upsertBudget({
+    userId,
+    category,
+    limit,
+    periodType,
+    periodKey,
+  }) {
     const queries = [
       Query.equal("userId", userId),
       Query.equal("category", category),
+      Query.equal("periodType", periodType),
+      Query.equal("periodKey", periodKey),
     ];
-
-    if (month) {
-      queries.push(Query.equal("month", month));
-    } else {
-      queries.push(Query.isNull("month"));
-    }
 
     const existing = await databases.listDocuments(
       DATABASE_ID,
@@ -93,7 +91,8 @@ export const budgetService = {
         userId,
         category,
         limit,
-        month: month ?? null,
+        periodType,
+        periodKey,
       }
     );
   },

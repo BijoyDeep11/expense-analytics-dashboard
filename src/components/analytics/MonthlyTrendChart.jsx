@@ -18,12 +18,23 @@ const MonthlyTrendChart = ({ data }) => {
   // ----------------------------------------
   // Normalize data: { Jan 2025: 1200 } → [{month, amount}]
   // ----------------------------------------
-  const chartData = Object.entries(data || {}).map(
-    ([month, amount]) => ({
+  const chartData = Object.entries(data)
+  .map(([month, amount]) => {
+    const [m, y] = month.split(" ");
+    const date = new Date(`${m} 1, ${y}`);
+
+    return {
       month,
       amount,
-    })
-  );
+      _date: date,
+    };
+  })
+  .sort((a, b) => a._date - b._date)
+  .map(({ month, amount }) => ({
+    month,
+    amount,
+  }));
+
 
   // ----------------------------------------
   // Check if there is any real spending

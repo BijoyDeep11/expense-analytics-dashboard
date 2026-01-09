@@ -37,19 +37,18 @@ useEffect(() => {
 
 
   const [filters, setFilters] = useState({
-    category: "all",
-    month: "all",
+  category: "all",
+  period: "all",   // instead of month
   });
 
-  const selectedMonth =
-  filters.month === "all" ? null : filters.month;
 
   useEffect(() => {
-      budgetService
-        .getBudgetsForMonth(user.$id, selectedMonth)
-        .then(setBudgets)
-        .catch(console.error);
-    }, [user.$id, selectedMonth]);
+  budgetService
+    .getBudgets(user.$id)   // ✅ fetch ALL
+    .then(setBudgets)
+    .catch(console.error);
+}, [user.$id]);
+
 
 
   // Fetch expenses
@@ -88,24 +87,29 @@ useEffect(() => {
         return false;
       }
 
-      if (filters.month !== "all") {
-      const d = new Date(expense.date);
-      const monthKey = d.toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      });
+      if (filters.period !== "all") {
+        const d = new Date(expense.date);
 
-      if (monthKey !== filters.month) {
-        return false;
+        const monthKey = d.toLocaleString("default", {
+          month: "short",
+          year: "numeric",
+        });
+
+        if (monthKey !== filters.period) {
+          return false;
+        }
       }
-    }
       return true;
     });
   }, [expenses, filters]);
 
   // Analytics (based on filtered data)
   const analytics = useMemo(() => {
-    return useExpenseAnalytics(filteredExpenses, budgets, categories);
+    return useExpenseAnalytics(
+      filteredExpenses,
+      budgets,
+      categories
+    );
   }, [filteredExpenses, budgets, categories]);
 
   const {
@@ -288,14 +292,15 @@ return (
                 }`}
               >
                 {budget.overBudget
-                  ? `Over budget by ${formatCurrency(
-                      Math.abs(budget.remaining)
-                    )}`
-                  : `${formatCurrency(
-                      budget.remaining
-                    )} left of ${formatCurrency(
-                      budget.limit
-                    )}`}
+              ? `Over ${budget.source} budget by ${formatCurrency(
+                  Math.abs(budget.remaining)
+                )}`
+              : `${formatCurrency(
+                  budget.remaining
+                )} left of ${formatCurrency(
+                  budget.limit
+                )} (${budget.source})`}
+
               </p>
             </div>
           ) : (
